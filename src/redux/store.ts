@@ -1,7 +1,9 @@
 import { configureStore } from '@reduxjs/toolkit'
-
+import blackjackReducer from './slices/blackjackSlice'
 export const store = configureStore({
-    reducer: {},
+    reducer: {
+        blackjack: blackjackReducer
+    },
 })
 
 // Infer the `RootState` and `AppDispatch` types from the store itself
