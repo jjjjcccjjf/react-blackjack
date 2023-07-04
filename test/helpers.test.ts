@@ -39,6 +39,21 @@ describe('Blackjack helper functions', () => {
 
     })
 
+    it('should return an empty array if there are no cards', async () => {
+
+        const sampleResponse = {
+            "success": true,
+            "deck_id": "nj33kv3rs104",
+            "cards": [],
+            "remaining": 52
+        }
+
+        const handValue = await getRawHandValue(sampleResponse.cards)
+
+        expect(handValue).toEqual([])
+
+    })
+
     it('should always put ACE at the end of the array', async () => {
         const cards = [
             {
@@ -86,6 +101,9 @@ describe('Blackjack helper functions', () => {
 
         const result3 = await getCalculatedHandValue(['JACK', 'ACE', '9'])
         expect(result3).toBe(30)
+
+        const result4 = await getCalculatedHandValue([])
+        expect(result4).toBe(0)
     })
 
     it('should count numerical hand values properly', async () => {

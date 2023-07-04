@@ -4,10 +4,23 @@ export type PileType = {
 }
 
 export type CardType = {
-    image: string,
-    value: string,
-    suit: string,
-    code: string
+    code: string;
+    image: string;
+    images: {
+        svg: string;
+        png: string;
+    };
+    value: string;
+    suit: string;
 }
 
-export type BustedType = "BUSTED" | "SAFE" | "BLACKJACK"
+export type NewDeckProp = {
+    deck_id: string,
+    remaining: number,
+    shuffled: boolean,
+    success: boolean
+}
+
+export type GameState = "INIT_GAME" | "NEW_GAME" | "PLAYER_TURN" | "DEALER_TURN" | "CHECK_WINNERS" | "END_GAME"
+
+export type BustedType = "BUSTED" | "SAFE" | "BLACKJACK" | "STAND"

@@ -1,6 +1,5 @@
 import { PileType, CardType, BustedType } from "../types";
 
-
 const getRawHandValue = async (pile: CardType[]): Promise<string[]> => {
     const rawHandValues = pile.map(item => item.value);
     rawHandValues.sort((a, b) => {
@@ -43,37 +42,5 @@ const checkBlackJack = async (value: number): Promise<BustedType> => {
         return "SAFE"
     }
 }
-
-
-// const getHandValue = (cards: Array<CardType>): number => {
-//     const handHasAce = haveAce(cards)
-// }
-
-// const countNormally = (cards: Array<CardType>): number => {
-//     return cards.reduce((acc, current) => acc + Number.parseInt(current.value), 0)
-// }
-
-// const haveAce = (cards: Array<CardType>): boolean => {
-//     return cards.some((card) => card.value === 'ACE');
-// }
-
-// const convertFaceCardsValue = (face: string, isAceBust: boolean = false): number => {
-//     let value = 0;
-//     switch (face) {
-//         case "JACK":
-//         case "KING":
-//         case "QUEEN":
-//             value = 10;
-//             break;
-//         case "ACE":
-//             value = isAceBust ? 1 : 11;
-//             break;
-//         default:
-//             throw new Error("Invalid face card");
-//     }
-
-//     return value;
-// }
-
 
 export { getRawHandValue, getCalculatedHandValue, checkBlackJack }

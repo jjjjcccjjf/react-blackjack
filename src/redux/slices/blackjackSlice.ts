@@ -1,26 +1,34 @@
 import { createSlice } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
-import type { RootState } from '../store'
-import type { CardType } from '../../types';
+import type { BustedType, CardType, GameState } from '../../types';
 
-// Define a type for the slice state
-interface BlackjackState {
-    deckId: string,
-    playerPile: CardType[],
-    dealerPile: CardType[]
+interface PlayerState {
+    pile: CardType[],
+    state: BustedType
+    handValue: number,
 }
 
-// Define the initial state using that type
-// const initialState: BlackjackState = {
-//     value: 0,
-// }
+interface BlackjackState {
+    deckId: string,
+    player: PlayerState,
+    dealer: PlayerState,
+    gameState: GameState
+}
 
 const initializeState = (): BlackjackState => {
-    // Perform any necessary initialization logic here
     return {
         deckId: localStorage.getItem('deckId') ?? '',
-        playerPile: [],
-        dealerPile: [],
+        player: {
+            pile: [],
+            state: "SAFE",
+            handValue: 0
+        },
+        dealer: {
+            pile: [],
+            state: "SAFE",
+            handValue: 0
+        },
+        gameState: "INIT_GAME"
     };
 };
 
@@ -35,22 +43,18 @@ export const blackjackSlice = createSlice({
             state.deckId = action.payload
         },
         setPlayerPile: (state, action: PayloadAction<CardType[]>) => {
-            state.playerPile = action.payload
+            state.player.pile = action.payload
+        },
+        setPlayerHandValue: (state, action: PayloadAction<number>) => {
+            state.player.handValue = action.payload
+        },
+        setGameState: (state, action: PayloadAction<GameState>) => {
+            state.gameState = action.payload
         }
-        // increment: (state) => {
-        //     state.value += 1
-        // },
-        // decrement: (state) => {
-        //     state.value -= 1
-        // },
-        // Use the PayloadAction type to declare the contents of `action.payload`
-        // incrementByAmount: (state, action: PayloadAction<number>) => {
-        //     state.value += action.payload
-        // },
     },
 })
 
-export const { setDeckId, setPlayerPile } = blackjackSlice.actions
+export const { setDeckId, setPlayerPile, setPlayerHandValue, setGameState } = blackjackSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
 // export const selectCount = (state: RootState) => state.counter.value
