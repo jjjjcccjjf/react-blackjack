@@ -5,7 +5,7 @@ import { setDeckId, setPlayerPile, setGameState, setPlayerHandValue } from '../r
 import Button from '../components/Button'
 import type { CardType, DrawResponseType } from '../types'
 import PlayerPile from '../components/PlayerPile'
-import { getCalculatedHandValue, getRawHandValue } from '../helpers'
+import { getCalculatedHandValue, getRawHandValue, stringifyPile } from '../helpers'
 import ApiHelper from '../helpers/api'
 
 const api = new ApiHelper()
@@ -21,20 +21,6 @@ type AddToPileResponseType = {
         }
     }
 }
-
-type ListPileResponseType = {
-    success: boolean,
-    deck_id: string,
-    remaining: number,
-    piles: {
-        [key: string]: {
-            remaining: number,
-            cards: CardType[]
-        }
-    }
-}
-
-
 
 export default function Game() {
     const deckId = useSelector((state: RootState) => state.blackjack.deckId)
@@ -87,25 +73,12 @@ export default function Game() {
     const handleDrawClick = async (drawCount: number) => {
         console.log('triggered')
         try {
-            const drawRes = await fetch(`https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=${drawCount}`)
-            const drawResJson: DrawResponseType = await drawRes.json()
-
-            const cardsString: string = drawResJson.cards.reduce((acc, curr: CardType) => {
-                acc += curr.code + ","
-                return acc
-            }, "")
-
-            const trimmedString = cardsString.replace(/,+$/, '');
-
-            const pileRes = await fetch(`https://deckofcardsapi.com/api/deck/${deckId}/pile/player/add/?cards=${trimmedString}`)
-            const pileResJson: AddToPileResponseType = await pileRes.json()
-
-            const listPileRes = await fetch(`https://deckofcardsapi.com/api/deck/${deckId}/pile/player/list/`)
-            const listPileResJson: ListPileResponseType = await listPileRes.json() // TODO: add type
-
-            dispatch(setPlayerPile(listPileResJson.piles.player.cards))
-
-            return listPileResJson.success
+            const drawResponse = await api.draw(deckId, "player", drawCount)
+            const stringifiedCards = await stringifyPile(drawResponse.cards)
+            const addToPileResponse = await api.addToPile(deckId, "player", stringifiedCards)
+            const listPileResponse = await api.listPile(deckId, "player")
+            dispatch(setPlayerPile(listPileResponse.piles.player.cards))
+            return listPileResponse.success
         } catch (e) {
             console.error(e)
             throw e;
