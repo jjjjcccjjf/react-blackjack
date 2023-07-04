@@ -3,19 +3,13 @@ import type { RootState } from '../redux/store'
 import { useSelector, useDispatch } from 'react-redux'
 import { setDeckId, setPlayerPile, setGameState, setPlayerHandValue } from '../redux/slices/blackjackSlice'
 import Button from '../components/Button'
-import type { CardType } from '../types'
+import type { CardType, DrawResponseType } from '../types'
 import PlayerPile from '../components/PlayerPile'
 import { getCalculatedHandValue, getRawHandValue } from '../helpers'
 import ApiHelper from '../helpers/api'
 
 const api = new ApiHelper()
 
-type DrawResponseType = {
-    success: boolean,
-    deck_id: string,
-    cards: CardType[],
-    remaining: number
-}
 
 type AddToPileResponseType = {
     success: boolean,
@@ -44,6 +38,7 @@ type ListPileResponseType = {
 
 export default function Game() {
     const deckId = useSelector((state: RootState) => state.blackjack.deckId)
+    const player = useSelector((state: RootState) => state.blackjack.player)
     const playerPile = useSelector((state: RootState) => state.blackjack.player.pile)
     const playerHandValue = useSelector((state: RootState) => state.blackjack.player.handValue)
     const gameState = useSelector((state: RootState) => state.blackjack.gameState)
@@ -61,10 +56,9 @@ export default function Game() {
                     } else {
                         await api.shuffleDeck(deckId)
                     }
-                    dispatch(setGameState('NEW_GAME'))
+                    dispatch(setGameState('PLAYER_TURN'))
                     break;
                 }
-                case 'NEW_GAME':
                 case 'PLAYER_TURN':
                 case 'DEALER_TURN':
                 case 'CHECK_WINNERS':
@@ -131,19 +125,22 @@ export default function Game() {
                     <PlayerPile cards={playerPile} handValue={playerHandValue}></PlayerPile>
                 </div>
                 <div className="flex flex-row justify-center gap-8 bg-slate-500 p-8">
-                    <div>
-                        {['INIT_GAME', 'NEW_GAME'].includes(gameState) ?
-                            <Button onClick={() => {
-                                handleDrawClick(2)
-                                dispatch(setGameState('PLAYER_TURN'))
-                            }}>Deal Hand
-                            </Button> :
-                            <Button onClick={() => handleDrawClick(1)}>HIT</Button>
-                        }
-                    </div>
-                    <div>
-                        <Button onClick={() => dispatch(setGameState('DEALER_TURN'))}>Stand</Button>
-                    </div>
+
+                    {player.pile.length < 2 ?
+                        <Button onClick={() => {
+                            handleDrawClick(2)
+                            dispatch(setGameState('PLAYER_TURN'))
+                        }}>
+                            DEAL HAND
+                        </Button>
+                        :
+                        <Button onClick={() => handleDrawClick(1)}>
+                            HIT
+                        </Button>
+                    }
+
+                    {player.pile.length >= 2 && <Button onClick={() => dispatch(setGameState('DEALER_TURN'))}>STAND</Button>}
+
                 </div>
             </div>
         </>

@@ -43,4 +43,14 @@ const checkBlackJack = async (value: number): Promise<BustedType> => {
     }
 }
 
-export { getRawHandValue, getCalculatedHandValue, checkBlackJack }
+const stringifyPile = (pile: CardType[]) => {
+    const cardsString: string = pile.reduce((acc, curr: CardType) => {
+        acc += curr.code + ","
+        return acc
+    }, "")
+
+    const trimmedString = cardsString.replace(/,+$/, '');
+    return trimmedString
+}
+
+export { getRawHandValue, getCalculatedHandValue, checkBlackJack, stringifyPile }

@@ -1,4 +1,4 @@
-import type { NewDeckProp } from "../types";
+import type { DrawResponseType, NewDeckProp, ListPileResponseType } from "../types";
 
 class ApiHelper {
 
@@ -35,6 +35,41 @@ class ApiHelper {
         }
     }
 
+    async draw(deckId: string, player: string, drawCount: number): Promise<DrawResponseType> {
+        try {
+            const res = await fetch(`https://deckofcardsapi.com/api/deck/${deckId}/draw/?count=${drawCount}`)
+            const data: DrawResponseType = await res.json()
+            console.log(`${player} drew ${drawCount} card(s)`)
+            return data
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
+    }
+
+    async addToPile(deckId: string, player: string, cards: string) {
+        try {
+            const res = await fetch(`https://deckofcardsapi.com/api/deck/${deckId}/pile/${player}/add/?cards=${cards}`)
+            const data: DrawResponseType = await res.json()
+            console.log(`${cards} added to ${player}'s hand`)
+            return data
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
+    }
+
+    async listPile(deckId: string, player: string) {
+        try {
+            const res = await fetch(`https://deckofcardsapi.com/api/deck/${deckId}/pile/${player}/list/`)
+            const data: ListPileResponseType = await res.json()
+            console.log(`retreiving ${player}'s hand`)
+            return data
+        } catch (error) {
+            console.error(error);
+            throw error;
+        }
+    }
 
 }
 

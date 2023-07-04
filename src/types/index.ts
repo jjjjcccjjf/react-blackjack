@@ -21,6 +21,25 @@ export type NewDeckProp = {
     success: boolean
 }
 
-export type GameState = "INIT_GAME" | "NEW_GAME" | "PLAYER_TURN" | "DEALER_TURN" | "CHECK_WINNERS" | "END_GAME"
+export type DrawResponseType = { //fix API responses to have separate file
+    success: boolean,
+    deck_id: string,
+    cards: CardType[],
+    remaining: number
+}
+
+export type ListPileResponseType = {
+    success: boolean,
+    deck_id: string,
+    remaining: number,
+    piles: {
+        [key: string]: {
+            remaining: number,
+            cards: CardType[]
+        }
+    }
+}
+
+export type GameState = "INIT_GAME" | "PLAYER_TURN" | "DEALER_TURN" | "CHECK_WINNERS" | "END_GAME"
 
 export type BustedType = "BUSTED" | "SAFE" | "BLACKJACK" | "STAND"

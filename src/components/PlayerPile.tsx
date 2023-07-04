@@ -8,7 +8,7 @@ export default function PlayerPile({ cards, handValue }: { cards: CardType[], ha
             <div>
                 <p>Total value: {handValue}</p>
             </div>
-            <div className="grid grid-flow-col justify-start">
+            <div className="grid grid-flow-col justify-start h-28">
                 {
                     cards.length > 0 ? cards.map((card: CardType, index: number) => {
                         return <img className="max-h-28" key={index} src={card.image} />
