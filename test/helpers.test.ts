@@ -1,5 +1,5 @@
 import { assert, describe, expect, it } from 'vitest'
-import { getCalculatedHandValue, getRawHandValue, checkBlackJack } from '../src/helpers'
+import { getCalculatedHandValue, getRawHandValue, checkBlackJack, stringifyPile, standCompare, bustedCompare, determineWinner } from '../src/helpers'
 
 describe('Blackjack helper functions', () => {
 
@@ -261,4 +261,92 @@ describe('Blackjack helper functions', () => {
         expect(result).toBe('BUSTED')
     })
 
+    it('should stringify the pile correctly', async () => {
+
+        const sampleResponse = {
+            "success": true,
+            "deck_id": "nj33kv3rs104",
+            "cards": [
+                {
+                    "code": "4C",
+                    "image": "https://deckofcardsapi.com/static/img/4C.png",
+                    "images": {
+                        "svg": "https://deckofcardsapi.com/static/img/4C.svg",
+                        "png": "https://deckofcardsapi.com/static/img/4C.png"
+                    },
+                    "value": "4",
+                    "suit": "CLUBS"
+                },
+                {
+                    "code": "6H",
+                    "image": "https://deckofcardsapi.com/static/img/6H.png",
+                    "images": {
+                        "svg": "https://deckofcardsapi.com/static/img/6H.svg",
+                        "png": "https://deckofcardsapi.com/static/img/6H.png"
+                    },
+                    "value": "6",
+                    "suit": "HEARTS"
+                }
+            ],
+            "remaining": 50
+        }
+
+        const result1 = await stringifyPile(sampleResponse.cards)
+        expect(result1).toBe('4C,6H')
+
+        const result2 = await stringifyPile([])
+        expect(result2).toBe('')
+
+    })
+
+    it('should compare stand values correctly', async () => {
+        const result1 = await standCompare(20, 19)
+        expect(result1).toBe('PLAYER_WIN')
+
+        const result2 = await standCompare(17, 19)
+        expect(result2).toBe('DEALER_WIN')
+
+        const result3 = await standCompare(17, 17)
+        expect(result3).toBe('TIE')
+    })
+
+    it('should compare busted values correctly', async () => {
+        const result1 = await bustedCompare(22, 25)
+        expect(result1).toBe('PLAYER_WIN')
+
+        const result2 = await bustedCompare(25, 23)
+        expect(result2).toBe('DEALER_WIN')
+
+        const result3 = await bustedCompare(26, 26)
+        expect(result3).toBe('TIE')
+    })
+
+    it('should determine winners correctly', async () => {
+        const result1 = await determineWinner(21, 25)
+        expect(result1).toBe('PLAYER_WIN')
+
+        const result2 = await determineWinner(26, 21)
+        expect(result2).toBe('DEALER_WIN')
+
+        const result3 = await determineWinner(26, 26)
+        expect(result3).toBe('TIE')
+
+        const result4 = await determineWinner(20, 20)
+        expect(result4).toBe('TIE')
+
+        const result5 = await determineWinner(20, 26)
+        expect(result5).toBe('PLAYER_WIN')
+
+        const result6 = await determineWinner(26, 20)
+        expect(result6).toBe('DEALER_WIN')
+
+        const result7 = await determineWinner(18, 16)
+        expect(result7).toBe('PLAYER_WIN')
+
+        const result8 = await determineWinner(16, 18)
+        expect(result8).toBe('DEALER_WIN')
+
+        const result9 = await determineWinner(21, 21)
+        expect(result9).toBe('TIE')
+    })
 })

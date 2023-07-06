@@ -1,4 +1,4 @@
-import { PileType, CardType, BustedType } from "../types";
+import { PileType, CardType, BustedType, WinnerState } from "../types";
 
 const getRawHandValue = async (pile: CardType[]): Promise<string[]> => {
     const rawHandValues = pile.map(item => item.value);
@@ -53,4 +53,47 @@ const stringifyPile = (pile: CardType[]) => {
     return trimmedString
 }
 
-export { getRawHandValue, getCalculatedHandValue, checkBlackJack, stringifyPile }
+const determineWinner = (playerHandValue: number, dealerHandValue: number): WinnerState => {
+    if (playerHandValue > 21 && dealerHandValue > 21) { // if both busted
+        return bustedCompare(playerHandValue, dealerHandValue)
+    } else if (playerHandValue === 21 && dealerHandValue === 21) { // if both blackjack
+        return "TIE"
+    } else if (playerHandValue === 21 && dealerHandValue !== 21) { // if player only blackjack
+        return "PLAYER_WIN"
+    } else if (playerHandValue !== 21 && dealerHandValue === 21) { // if dealer blackjack
+        return "DEALER_WIN"
+    } else if (playerHandValue < 21 && dealerHandValue < 21) { // stand showdown
+        return standCompare(playerHandValue, dealerHandValue)
+    } else if (playerHandValue < 21 && dealerHandValue > 21) { // dealer bust
+        return "PLAYER_WIN"
+    } else if (playerHandValue > 21 && dealerHandValue < 21) { // player bust
+        return "DEALER_WIN"
+    } else {
+        return "ERROR"
+    }
+}
+
+const standCompare = (playerHandValue: number, dealerHandValue: number): WinnerState => {
+    if (playerHandValue === dealerHandValue) {
+        return "TIE"
+    } else if (playerHandValue > dealerHandValue) {
+        return "PLAYER_WIN"
+    } else {
+        return "DEALER_WIN"
+    }
+}
+
+const bustedCompare = (playerHandValue: number, dealerHandValue: number): WinnerState => {
+    const playerDiff = playerHandValue - 21
+    const dealerDiff = dealerHandValue - 21
+
+    if (playerDiff === dealerDiff) {
+        return "TIE"
+    } else if (playerDiff < dealerDiff) {
+        return "PLAYER_WIN"
+    } else {
+        return "DEALER_WIN"
+    }
+}
+
+export { getRawHandValue, getCalculatedHandValue, checkBlackJack, stringifyPile, determineWinner, standCompare, bustedCompare }
