@@ -1,16 +1,16 @@
 import { useEffect } from 'react'
 import type { RootState } from '../redux/store'
 import { useSelector, useDispatch } from 'react-redux'
-import { setDeckId, setPlayerPile, setGameState, setDealerPile, setDealerHandValue, setPlayerHandValue, calculateHandValueAsync } from '../redux/slices/blackjackSlice'
+import { setDeckId, setGameState, calculateHandValueAsync, setPile } from '../redux/slices/blackjackSlice'
 import Button from '../components/Button'
 import PlayerPile from '../components/PlayerPile'
-import { getCalculatedHandValue, getRawHandValue, stringifyPile } from '../helpers'
+import { stringifyPile } from '../helpers'
 import ApiHelper from '../helpers/api'
 import DealerHelper from '../helpers/dealer'
 import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit'
 
 const api = new ApiHelper()
-const dealer = new DealerHelper()
+const dealerLogic = new DealerHelper()
 
 type AddToPileResponseType = {
     success: boolean,
@@ -27,8 +27,6 @@ export default function Game() {
     const deckId = useSelector((state: RootState) => state.blackjack.deckId)
     const player = useSelector((state: RootState) => state.blackjack.players.player)
     const dealer = useSelector((state: RootState) => state.blackjack.players.dealer)
-    const playerPile = useSelector((state: RootState) => state.blackjack.players.player.pile)
-    const playerHandValue = useSelector((state: RootState) => state.blackjack.players.player.handValue)
     const gameState = useSelector((state: RootState) => state.blackjack.gameState)
     const dispatch = useDispatch()
 
@@ -50,7 +48,7 @@ export default function Game() {
                 case 'PLAYER_TURN':
                     break;
                 case 'DEALER_TURN': {
-                    await dealerPlay(2);
+                    await handleDrawClick(2, "dealer");
                     break;
                 }
                 case 'CHECK_WINNERS':
@@ -65,13 +63,22 @@ export default function Game() {
         manageGameState()
     }, [gameState, dispatch]) // check if dispatch here is needed
 
+    useEffect(() => {
+        // dealer's logic
+        if (gameState === 'DEALER_TURN' && dealer.handValue < 17) {
+            handleDrawClick(1, "dealer")
+        } else {
+            dispatch(setGameState('CHECK_WINNERS'))
+        }
+    }, [dealer.handValue])
+
     const handleDrawClick = async (drawCount: number, player: string) => {
         try {
             const drawResponse = await api.draw(deckId, player, drawCount)
             const stringifiedCards = await stringifyPile(drawResponse.cards)
             const addToPileResponse = await api.addToPile(deckId, player, stringifiedCards)
             const listPileResponse = await api.listPile(deckId, player)
-            await dispatch(setPlayerPile(listPileResponse.piles.player.cards))
+            await dispatch(setPile({ pile: listPileResponse.piles[player].cards, player: player }))
             await (dispatch as ThunkDispatch<RootState, void, AnyAction>)(calculateHandValueAsync(player))
             return listPileResponse.success
         } catch (e) {
@@ -80,19 +87,19 @@ export default function Game() {
         }
     }
 
-    const dealerPlay = async (drawCount: number) => {
-        try {
-            const drawResponse = await api.draw(deckId, "dealer", drawCount)
-            const stringifiedCards = await stringifyPile(drawResponse.cards)
-            const addToPileResponse = await api.addToPile(deckId, "dealer", stringifiedCards)
-            const listPileResponse = await api.listPile(deckId, "dealer")
-            dispatch(setDealerPile(listPileResponse.piles.dealer.cards))
-            return listPileResponse.success
-        } catch (e) {
-            console.error(e)
-            throw e;
-        }
-    }
+    // const dealerPlay = async (drawCount: number) => {
+    //     try {
+    //         const drawResponse = await api.draw(deckId, "dealer", drawCount)
+    //         const stringifiedCards = await stringifyPile(drawResponse.cards)
+    //         const addToPileResponse = await api.addToPile(deckId, "dealer", stringifiedCards)
+    //         const listPileResponse = await api.listPile(deckId, "dealer")
+    //         dispatch(setDealerPile(listPileResponse.piles.dealer.cards))
+    //         return listPileResponse.success
+    //     } catch (e) {
+    //         console.error(e)
+    //         throw e;
+    //     }
+    // }
 
     return (
         <>
@@ -103,7 +110,7 @@ export default function Game() {
                     <PlayerPile cards={dealer.pile} handValue={dealer.handValue}></PlayerPile>
                 </div>
                 <div className="bg-red-200">
-                    <PlayerPile cards={playerPile} handValue={playerHandValue}></PlayerPile>
+                    <PlayerPile cards={player.pile} handValue={player.handValue}></PlayerPile>
                 </div>
                 <div className="flex flex-row justify-center gap-8 bg-slate-500 p-8">
 

@@ -22,12 +22,12 @@ export const calculateHandValueAsync = createAsyncThunk(
     'blackjack/calculateHandValueAsync',
     async (player: string, thunkAPI) => {
         const state = thunkAPI.getState() as RootState
-        
+
         try {
             const handArray = await getRawHandValue(state.blackjack.players[player].pile)
             const handValue = await getCalculatedHandValue(handArray)
             console.log(`${player}'s hand value: ${handValue}`);
-            
+
             return { player, handValue }
         } catch (error) {
             console.error(error)
@@ -97,7 +97,7 @@ export const blackjackSlice = createSlice({
     }
 })
 
-export const { setDeckId, setPlayerPile, setPlayerHandValue, setGameState, setDealerPile, setDealerHandValue } = blackjackSlice.actions
+export const { setDeckId, setGameState, setPile } = blackjackSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
 // export const selectCount = (state: RootState) => state.counter.value
