@@ -1,10 +1,10 @@
 import { useEffect } from 'react'
 import type { RootState } from '../redux/store'
 import { useSelector, useDispatch } from 'react-redux'
-import { setDeckId, setGameState, calculateHandValueAsync, setPile } from '../redux/slices/blackjackSlice'
+import { setDeckId, setGameState, calculateHandValueAsync, setPile, setCurrentStreak, setBestStreak, initializeGame } from '../redux/slices/blackjackSlice'
 import Button from '../components/Button'
 import PlayerPile from '../components/PlayerPile'
-import { stringifyPile } from '../helpers'
+import { determineWinner, stringifyPile, hasSoftHand } from '../helpers'
 import ApiHelper from '../helpers/api'
 import DealerHelper from '../helpers/dealer'
 import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit'
@@ -28,6 +28,8 @@ export default function Game() {
     const player = useSelector((state: RootState) => state.blackjack.players.player)
     const dealer = useSelector((state: RootState) => state.blackjack.players.dealer)
     const gameState = useSelector((state: RootState) => state.blackjack.gameState)
+    const bestStreak = useSelector((state: RootState) => state.blackjack.bestStreak)
+    const currentStreak = useSelector((state: RootState) => state.blackjack.currentStreak)
     const dispatch = useDispatch()
 
     useEffect(() => {
@@ -51,11 +53,35 @@ export default function Game() {
                     await handleDrawClick(2, "dealer");
                     break;
                 }
-                case 'CHECK_WINNERS':
+                case 'CHECK_WINNERS': {
+                    const winState = await determineWinner(player.handValue, dealer.handValue)
+
+                    if (winState === 'TIE') {
+                        dispatch(setGameState('END_GAME'))
+                    } else if (winState === 'DEALER_WIN') {
+                        if (bestStreak < currentStreak) {
+                            await dispatch(setBestStreak(currentStreak))
+                            localStorage.setItem('bestStreak', currentStreak.toString())
+                            await dispatch(setCurrentStreak(0))
+                        } else {
+                            await dispatch(setCurrentStreak(0))
+                        }
+                    } else if (winState === 'PLAYER_WIN') {
+                        const streak = currentStreak + 1
+                        await dispatch(setCurrentStreak(streak))
+
+                        if (bestStreak < streak) {
+                            await dispatch(setBestStreak(streak))
+                            localStorage.setItem('bestStreak', streak.toString())
+                        }
+                    }
+                    await dispatch(setGameState('END_GAME'))
+
                     break;
-                case 'END_GAME':
+                }
+                case 'END_GAME': {
                     break;
-                // dealer.play()
+                }
             }
 
         }
@@ -64,11 +90,13 @@ export default function Game() {
     }, [gameState, dispatch]) // check if dispatch here is needed
 
     useEffect(() => {
-        // dealer's logic
-        if (gameState === 'DEALER_TURN' && dealer.handValue < 17) {
-            handleDrawClick(1, "dealer")
-        } else {
-            dispatch(setGameState('CHECK_WINNERS'))
+        if (gameState === 'DEALER_TURN') {
+            // if (dealer.handValue < 17 || hasSoftHand(dealer.pile, dealer.handValue)) {
+            if (dealer.handValue < 17) {
+                handleDrawClick(1, "dealer")
+            } else {
+                dispatch(setGameState('CHECK_WINNERS'))
+            }
         }
     }, [dealer.handValue])
 
@@ -81,25 +109,12 @@ export default function Game() {
             await dispatch(setPile({ pile: listPileResponse.piles[player].cards, player: player }))
             await (dispatch as ThunkDispatch<RootState, void, AnyAction>)(calculateHandValueAsync(player))
             return listPileResponse.success
+            //todo: fix dealer sometimes not hitting
         } catch (e) {
             console.error(e)
             throw e;
         }
     }
-
-    // const dealerPlay = async (drawCount: number) => {
-    //     try {
-    //         const drawResponse = await api.draw(deckId, "dealer", drawCount)
-    //         const stringifiedCards = await stringifyPile(drawResponse.cards)
-    //         const addToPileResponse = await api.addToPile(deckId, "dealer", stringifiedCards)
-    //         const listPileResponse = await api.listPile(deckId, "dealer")
-    //         dispatch(setDealerPile(listPileResponse.piles.dealer.cards))
-    //         return listPileResponse.success
-    //     } catch (e) {
-    //         console.error(e)
-    //         throw e;
-    //     }
-    // }
 
     return (
         <>
@@ -113,21 +128,35 @@ export default function Game() {
                     <PlayerPile cards={player.pile} handValue={player.handValue}></PlayerPile>
                 </div>
                 <div className="flex flex-row justify-center gap-8 bg-slate-500 p-8">
+                    {
+                        player.pile.length < 2 && gameState === 'PLAYER_TURN' &&
 
-                    {player.pile.length < 2 ?
                         <Button onClick={() => {
                             handleDrawClick(2, "player")
                             dispatch(setGameState('PLAYER_TURN'))
                         }}>
                             DEAL HAND
                         </Button>
-                        :
+                    }
+                    {
+                        player.pile.length >= 2 && gameState === 'PLAYER_TURN' &&
                         <Button onClick={() => handleDrawClick(1, "player")}>
                             HIT
                         </Button>
-                    }
 
-                    {player.pile.length >= 2 && <Button onClick={() => dispatch(setGameState('DEALER_TURN'))}>STAND</Button>}
+                    }
+                    {
+                        player.pile.length >= 2 && gameState === 'PLAYER_TURN' &&
+                        <Button onClick={() => dispatch(setGameState('DEALER_TURN'))}>
+                            STAND
+                        </Button>
+                    }
+                    {
+                        gameState === 'END_GAME' &&
+                        <Button onClick={() => dispatch(initializeGame())}>
+                            CONTINUE
+                        </Button>
+                    }
 
                 </div>
             </div>

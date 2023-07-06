@@ -96,4 +96,8 @@ const bustedCompare = (playerHandValue: number, dealerHandValue: number): Winner
     }
 }
 
-export { getRawHandValue, getCalculatedHandValue, checkBlackJack, stringifyPile, determineWinner, standCompare, bustedCompare }
+const hasSoftHand = (pile: CardType[], handValue: number) => {
+    return pile.some((card) => card.value === 'ACE') && handValue < 19
+}
+
+export { getRawHandValue, getCalculatedHandValue, checkBlackJack, stringifyPile, determineWinner, standCompare, bustedCompare, hasSoftHand }

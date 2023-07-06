@@ -1,12 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
-import type { BustedType, CardType, GameState } from '../../types';
+import type { CardType, GameState } from '../../types';
 import { RootState } from '../store';
 import { getCalculatedHandValue, getRawHandValue } from '../../helpers';
 
 interface PlayerState {
     pile: CardType[],
-    state: BustedType
     handValue: number,
 }
 
@@ -15,7 +14,9 @@ interface BlackjackState {
     players: {
         [key: string]: PlayerState
     }
-    gameState: GameState
+    gameState: GameState,
+    bestStreak: number,
+    currentStreak: number,
 }
 
 export const calculateHandValueAsync = createAsyncThunk(
@@ -37,21 +38,23 @@ export const calculateHandValueAsync = createAsyncThunk(
 )
 
 const initializeState = (): BlackjackState => {
+    const deckId = localStorage.getItem('deckId')
+    const bestStreak = localStorage.getItem('bestStreak')
     return {
-        deckId: localStorage.getItem('deckId') ?? '',
+        deckId: deckId ?? '',
         players: {
             "player": {
                 pile: [],
-                state: "SAFE",
                 handValue: 0
             },
             "dealer": {
                 pile: [],
-                state: "SAFE",
                 handValue: 0
             },
         },
-        gameState: "INIT_GAME"
+        gameState: "INIT_GAME",
+        bestStreak: bestStreak ? parseInt(bestStreak) : 0,
+        currentStreak: 0
     };
 };
 
@@ -65,28 +68,31 @@ export const blackjackSlice = createSlice({
         setDeckId: (state, action: PayloadAction<string>) => {
             state.deckId = action.payload
         },
-        setPlayerPile: (state, action: PayloadAction<CardType[]>) => {
-            state.players.player.pile = action.payload
-        },
-        setPlayerHandValue: (state, action: PayloadAction<number>) => {
-            state.players.player.handValue = action.payload
-        },
-        setDealerPile: (state, action: PayloadAction<CardType[]>) => {
-            state.players.dealer.pile = action.payload
-        },
-        setDealerHandValue: (state, action: PayloadAction<number>) => {
-            state.players.dealer.handValue = action.payload
-        },
         setGameState: (state, action: PayloadAction<GameState>) => {
             state.gameState = action.payload
+        },
+        setCurrentStreak: (state, action: PayloadAction<number>) => {
+            state.currentStreak = action.payload
+        },
+        setBestStreak: (state, action: PayloadAction<number>) => {
+            state.bestStreak = action.payload
         },
         setPile: (state, action: PayloadAction<{ pile: CardType[], player: string }>) => {
             const { pile, player } = action.payload
             state.players[player].pile = pile
         },
-        setHandValue: (state, action: PayloadAction<{ handValue: number, player: string }>) => {
-            const { handValue, player } = action.payload
-            state.players[player].handValue = handValue
+        initializeGame(state, action: PayloadAction) {
+            state.gameState = 'INIT_GAME'
+            state.players = {
+                "player": {
+                    pile: [],
+                    handValue: 0
+                },
+                "dealer": {
+                    pile: [],
+                    handValue: 0
+                },
+            }
         }
     },
     extraReducers: (builder) => {
@@ -97,7 +103,7 @@ export const blackjackSlice = createSlice({
     }
 })
 
-export const { setDeckId, setGameState, setPile } = blackjackSlice.actions
+export const { setDeckId, setGameState, setPile, setCurrentStreak, setBestStreak, initializeGame } = blackjackSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
 // export const selectCount = (state: RootState) => state.counter.value

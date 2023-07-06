@@ -1,5 +1,5 @@
 import { assert, describe, expect, it } from 'vitest'
-import { getCalculatedHandValue, getRawHandValue, checkBlackJack, stringifyPile, standCompare, bustedCompare, determineWinner } from '../src/helpers'
+import { getCalculatedHandValue, getRawHandValue, checkBlackJack, stringifyPile, standCompare, bustedCompare, determineWinner, hasSoftHand } from '../src/helpers'
 
 describe('Blackjack helper functions', () => {
 
@@ -205,7 +205,7 @@ describe('Blackjack helper functions', () => {
         expect(result).toBe('BLACKJACK')
     })
 
-    
+
     it('should calculate a blackjack properly', async () => {
         const cards = [
             {
@@ -238,7 +238,7 @@ describe('Blackjack helper functions', () => {
                 "value": "JACK",
                 "suit": "CLUBS"
             },
-            
+
             {
                 "code": "9C",
                 "image": "https://deckofcardsapi.com/static/img/9C.png",
@@ -348,5 +348,34 @@ describe('Blackjack helper functions', () => {
 
         const result9 = await determineWinner(21, 21)
         expect(result9).toBe('TIE')
+    })
+
+
+    it('should determine soft hand correctly', async () => {
+        const cards = [
+            {
+                "code": "AH",
+                "image": "https://deckofcardsapi.com/static/img/AH.png",
+                "images": {
+                    "svg": "https://deckofcardsapi.com/static/img/AH.svg",
+                    "png": "https://deckofcardsapi.com/static/img/AH.png"
+                },
+                "value": "ACE",
+                "suit": "HEARTS"
+            },
+            {
+                "code": "7H",
+                "image": "https://deckofcardsapi.com/static/img/7H.png",
+                "images": {
+                    "svg": "https://deckofcardsapi.com/static/img/7H.svg",
+                    "png": "https://deckofcardsapi.com/static/img/7H.png"
+                },
+                "value": "7",
+                "suit": "HEARTS"
+            }
+        ]
+
+        const result1 = await hasSoftHand(cards, 17)
+        expect(result1).toBe(true)
     })
 })

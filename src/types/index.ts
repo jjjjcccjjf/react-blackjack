@@ -43,5 +43,3 @@ export type ListPileResponseType = {
 export type WinnerState = "TIE" | "PLAYER_WIN" | "DEALER_WIN" | "ERROR"
 
 export type GameState = "INIT_GAME" | "PLAYER_TURN" | "DEALER_TURN" | "CHECK_WINNERS" | "END_GAME"
-
-export type BustedType = "BUSTED" | "SAFE" | "BLACKJACK" | "STAND"
