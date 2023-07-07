@@ -377,5 +377,58 @@ describe('Blackjack helper functions', () => {
 
         const result1 = await hasSoftHand(cards, 17)
         expect(result1).toBe(true)
+
+        const cards2 = [
+            {
+                "code": "AH",
+                "image": "https://deckofcardsapi.com/static/img/AH.png",
+                "images": {
+                    "svg": "https://deckofcardsapi.com/static/img/AH.svg",
+                    "png": "https://deckofcardsapi.com/static/img/AH.png"
+                },
+                "value": "ACE",
+                "suit": "HEARTS"
+            },
+            {
+                "code": "KH",
+                "image": "https://deckofcardsapi.com/static/img/KH.png",
+                "images": {
+                    "svg": "https://deckofcardsapi.com/static/img/KH.svg",
+                    "png": "https://deckofcardsapi.com/static/img/KH.png"
+                },
+                "value": "KING",
+                "suit": "HEARTS"
+            }
+        ]
+
+        const result2 = await hasSoftHand(cards, 21)
+        expect(result2).toBe(false)
+
+
+        const cards3 = [
+            {
+                "code": "AH",
+                "image": "https://deckofcardsapi.com/static/img/AH.png",
+                "images": {
+                    "svg": "https://deckofcardsapi.com/static/img/AH.svg",
+                    "png": "https://deckofcardsapi.com/static/img/AH.png"
+                },
+                "value": "ACE",
+                "suit": "HEARTS"
+            },
+            {
+                "code": "3H",
+                "image": "https://deckofcardsapi.com/static/img/3H.png",
+                "images": {
+                    "svg": "https://deckofcardsapi.com/static/img/3H.svg",
+                    "png": "https://deckofcardsapi.com/static/img/3H.png"
+                },
+                "value": "3",
+                "suit": "HEARTS"
+            }
+        ]
+
+        const result3 = await hasSoftHand(cards, 14)
+        expect(result3).toBe(true)
     })
 })

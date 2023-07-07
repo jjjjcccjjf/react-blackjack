@@ -6,22 +6,9 @@ import Button from '../components/Button'
 import PlayerPile from '../components/PlayerPile'
 import { determineWinner, stringifyPile, hasSoftHand } from '../helpers'
 import ApiHelper from '../helpers/api'
-import DealerHelper from '../helpers/dealer'
 import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit'
 
 const api = new ApiHelper()
-const dealerLogic = new DealerHelper()
-
-type AddToPileResponseType = {
-    success: boolean,
-    deck_id: string,
-    remaining: number,
-    piles: {
-        [key: string]: {
-            "remaining": number
-        }
-    }
-}
 
 export default function Game() {
     const deckId = useSelector((state: RootState) => state.blackjack.deckId)
@@ -91,8 +78,7 @@ export default function Game() {
 
     useEffect(() => {
         if (gameState === 'DEALER_TURN') {
-            // if (dealer.handValue < 17 || hasSoftHand(dealer.pile, dealer.handValue)) {
-            if (dealer.handValue < 17) {
+            if (dealer.handValue < 17 || hasSoftHand(dealer.pile, dealer.handValue)) {
                 handleDrawClick(1, "dealer")
             } else {
                 dispatch(setGameState('CHECK_WINNERS'))
