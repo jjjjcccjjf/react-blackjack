@@ -25,6 +25,17 @@ const router = createBrowserRouter([
   },
 ]);
 
+// main.js or index.js
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('../sw.js')
+    .then(registration => {
+      console.log('Service Worker registered:', registration);
+    })
+    .catch(error => {
+      console.error('Service Worker registration failed:', error);
+    });
+}
+
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
   <React.StrictMode>
     <Provider store={store}>

@@ -81,7 +81,7 @@ export const blackjackSlice = createSlice({
             const { pile, player } = action.payload
             state.players[player].pile = pile
         },
-        initializeGame(state, action: PayloadAction) {
+        initializeGame(state) {
             state.gameState = 'INIT_GAME'
             state.players = {
                 "player": {

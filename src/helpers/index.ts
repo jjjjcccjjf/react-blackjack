@@ -1,4 +1,4 @@
-import { PileType, CardType, BustedType, WinnerState } from "../types";
+import { CardType, BustedType, WinnerState } from "../types";
 
 const getRawHandValue = async (pile: CardType[]): Promise<string[]> => {
     const rawHandValues = pile.map(item => item.value);

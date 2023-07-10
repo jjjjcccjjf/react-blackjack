@@ -90,7 +90,7 @@ export default function Game() {
         try {
             const drawResponse = await api.draw(deckId, player, drawCount)
             const stringifiedCards = await stringifyPile(drawResponse.cards)
-            const addToPileResponse = await api.addToPile(deckId, player, stringifiedCards)
+            await api.addToPile(deckId, player, stringifiedCards)
             const listPileResponse = await api.listPile(deckId, player)
             await dispatch(setPile({ pile: listPileResponse.piles[player].cards, player: player }))
             await (dispatch as ThunkDispatch<RootState, void, AnyAction>)(calculateHandValueAsync(player))
