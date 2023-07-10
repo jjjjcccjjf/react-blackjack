@@ -106,14 +106,14 @@ export default function Game() {
         <>
             <div className="flex flex-col items-center justify-center gap-8 h-full">
 
-                <div className="h-20"> cards</div>
-                <div className="bg-red-200">
+                <div className="h-20"><img src="https://deckofcardsapi.com/static/img/back.png" className="max-h-28" /></div>
+                <div className="w-full p-4">
                     <PlayerPile cards={dealer.pile} handValue={dealer.handValue}></PlayerPile>
                 </div>
-                <div className="bg-red-200">
+                <div className="w-full p-4">
                     <PlayerPile cards={player.pile} handValue={player.handValue}></PlayerPile>
                 </div>
-                <div className="flex flex-row justify-center gap-8 bg-slate-500 p-8">
+                <div className="flex flex-row justify-center gap-8 p-8">
                     {
                         player.pile.length < 2 && gameState === 'PLAYER_TURN' &&
 

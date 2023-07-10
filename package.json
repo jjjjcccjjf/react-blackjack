@@ -12,6 +12,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fontsource/roboto": "^5.0.5",
     "@reduxjs/toolkit": "^1.9.5",
     "localforage": "^1.10.0",
     "match-sorter": "^6.3.1",

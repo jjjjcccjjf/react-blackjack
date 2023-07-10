@@ -7,7 +7,7 @@ type ButtonProps = {
 export default function Button({ children, disabled, onClick }: ButtonProps) {
     return (
         <>
-            <button onClick={onClick} disabled={disabled} className="h-10 w-14 rounded-md bg-green-50">{children}</button>
+            <button onClick={onClick} disabled={disabled} className="glassButton h-10 w-28 rounded-lg">{children}</button>
         </>
     )
 }   
