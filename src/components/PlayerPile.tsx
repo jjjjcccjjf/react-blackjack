@@ -10,7 +10,7 @@ export default function PlayerPile({ cards, handValue }: { cards: CardType[], ha
                 <div>
                     <p className="font-medium text-xl ">Your hand value: {handValue}</p>
                 </div>
-                <div className="grid grid-flow-col justify-start h-36 backdrop-blur-lg shadow-inner items-center p-4 rounded-xl">
+                <div className="grid grid-flow-col justify-start h-36 backdrop-blur-lg shadow-inner border border-white/10 items-center p-4 rounded-xl">
                     {
                         cards.length > 0 ? cards.map((card: CardType, index: number) => {
                             return <img className="max-h-28" key={index} src={card.image} />

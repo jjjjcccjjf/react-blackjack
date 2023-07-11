@@ -7,6 +7,7 @@ import PlayerPile from '../components/PlayerPile'
 import { determineWinner, stringifyPile, hasSoftHand } from '../helpers'
 import ApiHelper from '../helpers/api'
 import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit'
+import Logs from '../components/Logs'
 
 const api = new ApiHelper()
 
@@ -104,7 +105,7 @@ export default function Game() {
 
     return (
         <>
-            <div className="flex flex-col items-center justify-center gap-8 h-full">
+            <div className="flex flex-col items-center justify-center gap-8 h-full pb-36">
 
                 <div className="h-20"><img src="https://deckofcardsapi.com/static/img/back.png" className="max-h-28" /></div>
                 <div className="w-full p-4">
@@ -113,14 +114,14 @@ export default function Game() {
                 <div className="w-full p-4">
                     <PlayerPile cards={player.pile} handValue={player.handValue}></PlayerPile>
                 </div>
-                <div className="flex flex-row justify-center gap-8 p-8">
+                <div className="flex flex-row justify-center gap-8 items-center h-32">
                     {
                         player.pile.length < 2 && gameState === 'PLAYER_TURN' &&
 
                         <Button onClick={() => {
                             handleDrawClick(2, "player")
                             dispatch(setGameState('PLAYER_TURN'))
-                        }}>
+                        }} className="">
                             DEAL HAND
                         </Button>
                     }
@@ -145,6 +146,7 @@ export default function Game() {
                     }
 
                 </div>
+                <Logs></Logs>
             </div>
         </>
     )
