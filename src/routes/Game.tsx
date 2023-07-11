@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import type { RootState } from '../redux/store'
 import { useSelector, useDispatch } from 'react-redux'
-import { setDeckId, setGameState, calculateHandValueAsync, setPile, setCurrentStreak, setBestStreak, initializeGame } from '../redux/slices/blackjackSlice'
+import { setDeckId, setGameState, calculateHandValueAsync, setPile, setCurrentStreak, setBestStreak, initializeGame, addToGameLogs } from '../redux/slices/blackjackSlice'
 import Button from '../components/Button'
 import PlayerPile from '../components/PlayerPile'
 import { determineWinner, stringifyPile, hasSoftHand } from '../helpers'
@@ -27,12 +27,15 @@ export default function Game() {
                 case 'INIT_GAME': {
                     if (!deckId) {
                         const newDeckId = await api.getNewDeck()
+                        await dispatch(addToGameLogs('Shuffling deck...'))
                         dispatch(setDeckId(newDeckId))
                         localStorage.setItem('deckId', newDeckId)
                     } else {
+                        await dispatch(addToGameLogs('Shuffling deck...'))
                         await api.shuffleDeck(deckId)
                     }
                     dispatch(setGameState('PLAYER_TURN'))
+                    dispatch(addToGameLogs('Deck reshuffled.'))
                     break;
                 }
                 case 'PLAYER_TURN':
@@ -46,6 +49,7 @@ export default function Game() {
 
                     if (winState === 'TIE') {
                         dispatch(setGameState('END_GAME'))
+                        await dispatch(addToGameLogs('TIE.'))
                     } else if (winState === 'DEALER_WIN') {
                         if (bestStreak < currentStreak) {
                             await dispatch(setBestStreak(currentStreak))
@@ -54,6 +58,7 @@ export default function Game() {
                         } else {
                             await dispatch(setCurrentStreak(0))
                         }
+                        await dispatch(addToGameLogs('DEALER wins.'))
                     } else if (winState === 'PLAYER_WIN') {
                         const streak = currentStreak + 1
                         await dispatch(setCurrentStreak(streak))
@@ -62,6 +67,7 @@ export default function Game() {
                             await dispatch(setBestStreak(streak))
                             localStorage.setItem('bestStreak', streak.toString())
                         }
+                        await dispatch(addToGameLogs('PLAYER wins.'))
                     }
                     await dispatch(setGameState('END_GAME'))
 
@@ -82,7 +88,9 @@ export default function Game() {
             if (dealer.handValue < 17 || hasSoftHand(dealer.pile, dealer.handValue)) {
                 handleDrawClick(1, "dealer")
             } else {
+                dispatch(addToGameLogs('DEALER stands.'))
                 dispatch(setGameState('CHECK_WINNERS'))
+
             }
         }
     }, [dealer.handValue])
@@ -90,8 +98,10 @@ export default function Game() {
     const handleDrawClick = async (drawCount: number, player: string) => {
         try {
             const drawResponse = await api.draw(deckId, player, drawCount)
+            await (dispatch(addToGameLogs(`${player.toUpperCase()} drew ${drawCount} card(s).`)))
             const stringifiedCards = await stringifyPile(drawResponse.cards)
-            await api.addToPile(deckId, player, stringifiedCards)
+            const added = await api.addToPile(deckId, player, stringifiedCards)
+            await dispatch(addToGameLogs(added))
             const listPileResponse = await api.listPile(deckId, player)
             await dispatch(setPile({ pile: listPileResponse.piles[player].cards, player: player }))
             await (dispatch as ThunkDispatch<RootState, void, AnyAction>)(calculateHandValueAsync(player))
@@ -134,7 +144,10 @@ export default function Game() {
                     }
                     {
                         player.pile.length >= 2 && gameState === 'PLAYER_TURN' &&
-                        <Button onClick={() => dispatch(setGameState('DEALER_TURN'))}>
+                        <Button onClick={() => {
+                            dispatch(setGameState('DEALER_TURN'))
+                            dispatch(addToGameLogs('PLAYER stands.'))
+                        }}>
                             STAND
                         </Button>
                     }

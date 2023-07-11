@@ -49,10 +49,13 @@ class ApiHelper {
 
     async addToPile(deckId: string, player: string, cards: string) {
         try {
-            const res = await fetch(`https://deckofcardsapi.com/api/deck/${deckId}/pile/${player}/add/?cards=${cards}`)
-            const data: DrawResponseType = await res.json()
-            console.log(`${cards} added to ${player}'s hand`)
-            return data
+            // const res = 
+            await fetch(`https://deckofcardsapi.com/api/deck/${deckId}/pile/${player}/add/?cards=${cards}`)
+            // const data: DrawResponseType = await res.json()
+            console.log(`${cards} added to ${player.toLocaleUpperCase()}'s hand.`)
+            const cardsText = cards.slice(0, 3) + ' ' + cards.slice(3);
+            return `${cardsText} added to ${player.toLocaleUpperCase()}'S hand.`
+            // return data
         } catch (error) {
             console.error(error);
             throw error;

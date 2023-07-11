@@ -17,6 +17,7 @@ interface BlackjackState {
     gameState: GameState,
     bestStreak: number,
     currentStreak: number,
+    gameLogs: string[]
 }
 
 export const calculateHandValueAsync = createAsyncThunk(
@@ -54,7 +55,8 @@ const initializeState = (): BlackjackState => {
         },
         gameState: "INIT_GAME",
         bestStreak: bestStreak ? parseInt(bestStreak) : 0,
-        currentStreak: 0
+        currentStreak: 0,
+        gameLogs: []
     };
 };
 
@@ -81,6 +83,9 @@ export const blackjackSlice = createSlice({
             const { pile, player } = action.payload
             state.players[player].pile = pile
         },
+        addToGameLogs: (state, action: PayloadAction<string>) => {
+            state.gameLogs.push(action.payload)
+        },
         initializeGame(state) {
             state.gameState = 'INIT_GAME'
             state.players = {
@@ -99,11 +104,14 @@ export const blackjackSlice = createSlice({
         builder.addCase(calculateHandValueAsync.fulfilled, (state, action: PayloadAction<{ handValue: number, player: string }>) => {
             const { handValue, player } = action.payload
             state.players[player].handValue = handValue
+            if(handValue === 21) {
+                state.gameLogs.push(`${player.toUpperCase()} blackjack!`)
+            }
         });
     }
 })
 
-export const { setDeckId, setGameState, setPile, setCurrentStreak, setBestStreak, initializeGame } = blackjackSlice.actions
+export const { setDeckId, setGameState, setPile, setCurrentStreak, setBestStreak, initializeGame, addToGameLogs } = blackjackSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
 // export const selectCount = (state: RootState) => state.counter.value
