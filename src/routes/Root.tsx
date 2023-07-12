@@ -4,6 +4,7 @@ import { RootState } from "../redux/store";
 import { AiFillHome, AiFillQuestionCircle } from 'react-icons/ai'
 
 import '@fontsource/roboto';
+import Music from "../components/Music";
 
 export default function Root() {
 
@@ -17,6 +18,7 @@ export default function Root() {
                     <p className="h-10 flex justify-center items-center">🏆 Best: {bestStreak}</p>
                     <p className="h-10 flex justify-center items-center">🔥 Streak: {currentStreak}</p>
 
+                    <Music />
                     <button className="flex justify-center items-center text-white/70 text-3xl hover:text-white/50"><AiFillQuestionCircle /></button>
                 </div>
                 <div className="h-full glass w-full ">

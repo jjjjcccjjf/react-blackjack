@@ -1,17 +1,21 @@
 import { useEffect } from 'react'
 import type { RootState } from '../redux/store'
 import { useSelector, useDispatch } from 'react-redux'
-import { setDeckId, setGameState, calculateHandValueAsync, setPile, setCurrentStreak, setBestStreak, initializeGame, addToGameLogs, setDrawLoading } from '../redux/slices/blackjackSlice'
+import { setDeckId, setGameState, calculateHandValueAsync, setPile, setCurrentStreak, setBestStreak, initializeGame, addToGameLogs, setDrawLoading, setMusic } from '../redux/slices/blackjackSlice'
 import Button from '../components/Button'
 import PlayerPile from '../components/PlayerPile'
 import { determineWinner, stringifyPile, hasSoftHand } from '../helpers'
 import ApiHelper from '../helpers/api'
 import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit'
 import Logs from '../components/Logs'
+import clickSfx from '../assets/click.mp3'
 
 const api = new ApiHelper()
 
 export default function Game() {
+
+    const clickAudio = new Audio(clickSfx)
+    clickAudio.volume = 0.25
 
     const deckId = useSelector((state: RootState) => state.blackjack.deckId)
     const player = useSelector((state: RootState) => state.blackjack.players.player)
@@ -19,6 +23,7 @@ export default function Game() {
     const gameState = useSelector((state: RootState) => state.blackjack.gameState)
     const bestStreak = useSelector((state: RootState) => state.blackjack.bestStreak)
     const currentStreak = useSelector((state: RootState) => state.blackjack.currentStreak)
+    const isMusicPlaying = useSelector((state: RootState) => state.blackjack.music.isPlaying)
     const dispatch = useDispatch()
 
     useEffect(() => {
@@ -88,7 +93,7 @@ export default function Game() {
         if (gameState === 'DEALER_TURN') {
             if (dealer.handValue < 17 || hasSoftHand(dealer.pile, dealer.handValue)) {
                 setTimeout(() => handleDrawClick(1, "dealer"), 200)
-                
+
             } else {
                 dispatch(addToGameLogs('DEALER stands.'))
                 dispatch(setGameState('CHECK_WINNERS'))
@@ -136,15 +141,22 @@ export default function Game() {
                         player.pile.length < 2 && gameState === 'PLAYER_TURN' &&
 
                         <Button onClick={() => {
+                            clickAudio.play()
                             handleDrawClick(2, "player")
                             dispatch(setGameState('PLAYER_TURN'))
+                            if (!isMusicPlaying) {
+                                dispatch(setMusic({ isPlaying: true, volume: 1 }))
+                            }
                         }} className="">
                             DEAL HAND
                         </Button>
                     }
                     {
                         player.pile.length >= 2 && gameState === 'PLAYER_TURN' &&
-                        <Button onClick={() => handleDrawClick(1, "player")}>
+                        <Button onClick={() => {
+                            clickAudio.play()
+                            handleDrawClick(1, "player")
+                        }}>
                             HIT
                         </Button>
 
@@ -152,6 +164,7 @@ export default function Game() {
                     {
                         player.pile.length >= 2 && gameState === 'PLAYER_TURN' &&
                         <Button onClick={() => {
+                            clickAudio.play()
                             dispatch(setGameState('DEALER_TURN'))
                             dispatch(addToGameLogs('PLAYER stands.'))
                         }}>
@@ -160,7 +173,10 @@ export default function Game() {
                     }
                     {
                         gameState === 'END_GAME' &&
-                        <Button onClick={() => dispatch(initializeGame())}>
+                        <Button onClick={() => {
+                            clickAudio.play()
+                            dispatch(initializeGame())
+                        }}>
                             CONTINUE
                         </Button>
                     }
