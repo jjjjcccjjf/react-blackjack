@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import type { PayloadAction } from '@reduxjs/toolkit'
-import type { CardType, GameState } from '../../types';
+import type { CardType, GameState, drawLoading } from '../../types';
 import { RootState } from '../store';
 import { getCalculatedHandValue, getRawHandValue } from '../../helpers';
 
@@ -17,7 +17,8 @@ interface BlackjackState {
     gameState: GameState,
     bestStreak: number,
     currentStreak: number,
-    gameLogs: string[]
+    gameLogs: string[],
+    drawLoading: drawLoading
 }
 
 export const calculateHandValueAsync = createAsyncThunk(
@@ -56,7 +57,8 @@ const initializeState = (): BlackjackState => {
         gameState: "INIT_GAME",
         bestStreak: bestStreak ? parseInt(bestStreak) : 0,
         currentStreak: 0,
-        gameLogs: []
+        gameLogs: [],
+        drawLoading: { player: null, cardCount: null }
     };
 };
 
@@ -98,20 +100,23 @@ export const blackjackSlice = createSlice({
                     handValue: 0
                 },
             }
+        },
+        setDrawLoading: (state, action: PayloadAction<drawLoading>) => {
+            state.drawLoading = (action.payload)
         }
     },
     extraReducers: (builder) => {
         builder.addCase(calculateHandValueAsync.fulfilled, (state, action: PayloadAction<{ handValue: number, player: string }>) => {
             const { handValue, player } = action.payload
             state.players[player].handValue = handValue
-            if(handValue === 21) {
+            if (handValue === 21) {
                 state.gameLogs.push(`${player.toUpperCase()} blackjack!`)
             }
         });
     }
 })
 
-export const { setDeckId, setGameState, setPile, setCurrentStreak, setBestStreak, initializeGame, addToGameLogs } = blackjackSlice.actions
+export const { setDeckId, setGameState, setPile, setCurrentStreak, setBestStreak, initializeGame, addToGameLogs, setDrawLoading } = blackjackSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
 // export const selectCount = (state: RootState) => state.counter.value

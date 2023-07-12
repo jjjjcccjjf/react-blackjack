@@ -40,6 +40,11 @@ export type ListPileResponseType = {
     }
 }
 
+export type drawLoading = {
+    player: "player" | "dealer" | null
+    cardCount: number
+}
+
 export type WinnerState = "TIE" | "PLAYER_WIN" | "DEALER_WIN" | "ERROR"
 
 export type GameState = "INIT_GAME" | "PLAYER_TURN" | "DEALER_TURN" | "CHECK_WINNERS" | "END_GAME"

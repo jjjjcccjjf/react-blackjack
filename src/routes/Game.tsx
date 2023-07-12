@@ -1,18 +1,18 @@
 import { useEffect } from 'react'
 import type { RootState } from '../redux/store'
 import { useSelector, useDispatch } from 'react-redux'
-import { setDeckId, setGameState, calculateHandValueAsync, setPile, setCurrentStreak, setBestStreak, initializeGame, addToGameLogs } from '../redux/slices/blackjackSlice'
+import { setDeckId, setGameState, calculateHandValueAsync, setPile, setCurrentStreak, setBestStreak, initializeGame, addToGameLogs, setDrawLoading } from '../redux/slices/blackjackSlice'
 import Button from '../components/Button'
 import PlayerPile from '../components/PlayerPile'
 import { determineWinner, stringifyPile, hasSoftHand } from '../helpers'
 import ApiHelper from '../helpers/api'
 import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit'
 import Logs from '../components/Logs'
-import Loader from '../components/Loader'
 
 const api = new ApiHelper()
 
 export default function Game() {
+
     const deckId = useSelector((state: RootState) => state.blackjack.deckId)
     const player = useSelector((state: RootState) => state.blackjack.players.player)
     const dealer = useSelector((state: RootState) => state.blackjack.players.dealer)
@@ -87,7 +87,8 @@ export default function Game() {
     useEffect(() => {
         if (gameState === 'DEALER_TURN') {
             if (dealer.handValue < 17 || hasSoftHand(dealer.pile, dealer.handValue)) {
-                handleDrawClick(1, "dealer")
+                setTimeout(() => handleDrawClick(1, "dealer"), 200)
+                
             } else {
                 dispatch(addToGameLogs('DEALER stands.'))
                 dispatch(setGameState('CHECK_WINNERS'))
@@ -96,7 +97,8 @@ export default function Game() {
         }
     }, [dealer.handValue])
 
-    const handleDrawClick = async (drawCount: number, player: string) => {
+    const handleDrawClick = async (drawCount: number, player: 'dealer' | 'player') => {
+        await dispatch(setDrawLoading({ player: player, cardCount: drawCount }))
         try {
             const drawResponse = await api.draw(deckId, player, drawCount)
             await (dispatch(addToGameLogs(`${player.toUpperCase()} drew ${drawCount} card(s).`)))
@@ -106,6 +108,7 @@ export default function Game() {
             const listPileResponse = await api.listPile(deckId, player)
             await dispatch(setPile({ pile: listPileResponse.piles[player].cards, player: player }))
             await (dispatch as ThunkDispatch<RootState, void, AnyAction>)(calculateHandValueAsync(player))
+            await dispatch(setDrawLoading({ player: null, cardCount: 0 }))
             return listPileResponse.success
             //todo: fix dealer sometimes not hitting
         } catch (e) {
@@ -120,14 +123,15 @@ export default function Game() {
 
                 <div className="h-20">
                     <img src="https://deckofcardsapi.com/static/img/back.png" className="max-h-28" />
+                    {/* <Loader></Loader> */}
                 </div>
                 <div className="w-full p-4">
-                    <PlayerPile cards={dealer.pile} handValue={dealer.handValue}></PlayerPile>
+                    <PlayerPile cards={dealer.pile} handValue={dealer.handValue} player='dealer'></PlayerPile>
                 </div>
                 <div className="w-full p-4">
-                    <PlayerPile cards={player.pile} handValue={player.handValue}></PlayerPile>
+                    <PlayerPile cards={player.pile} handValue={player.handValue} player='player'></PlayerPile>
                 </div>
-                <div className="flex flex-row justify-center gap-8 items-center h-32">
+                <div className="flex flex-row justify-center gap-8 items-center h-16">
                     {
                         player.pile.length < 2 && gameState === 'PLAYER_TURN' &&
 

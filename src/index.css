@@ -26,18 +26,18 @@ body {
 }
 
 .glassButton {
-    background-color: #278b43;
+    background-color: #2b6ca9;
     background-image: linear-gradient(180deg, hsla(0, 0%, 100%, .15), hsla(0, 0%, 100%, 0));
-    border-color: #25833f;
+    border-color: #266499;
     color: #fff;
 }
 
 
 .glassButton:focus,
 .glassButton:hover {
-    background-color: #278b43;
+    background-color: #2b6ca9;
     background-image: var(--bs-gradient);
-    border-color: #25833f;
+    border-color: #266499;
     color: #fff;
 }
 
@@ -45,7 +45,7 @@ body {
     /* width: 100px; */
     /* Adjust the width and height as needed */
     /* height: 100px; */
-    animation: spin .6s infinite linear;
+    animation: spin .7s infinite linear;
     /* Apply the spin animation */
 }
 

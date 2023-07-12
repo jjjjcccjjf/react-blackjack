@@ -11,7 +11,7 @@ export default function Root() {
     const currentStreak = useSelector((state: RootState) => state.blackjack.currentStreak)
     return (
         <>
-            <div className="container mx-auto max-w-sm  h-screen flex items-center justify-center flex-col font-[Roboto] text-white">
+            <div className="container mx-auto max-w-sm h-screen flex items-center justify-center flex-col font-[Roboto] text-white">
                 <div className="p-4 flex flex-row justify-between w-full glass backdrop-blur-lg text-xl">
                     <Link className="flex justify-center items-center text-white/70 text-2xl hover:text-white/50" to="/"> <AiFillHome /></Link>
                     <p className="h-10 flex justify-center items-center">🏆 Best: {bestStreak}</p>

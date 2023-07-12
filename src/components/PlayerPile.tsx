@@ -1,7 +1,10 @@
+import { useSelector } from 'react-redux'
 import type { CardType } from "../types";
+import { RootState } from '../redux/store';
+import Loader from './Loader';
 
-export default function PlayerPile({ cards, handValue }: { cards: CardType[], handValue: number }) {
-
+export default function PlayerPile({ cards, handValue, player }: { cards: CardType[], handValue: number, player: string }) {
+    const drawLoading = useSelector((slice: RootState) => slice.blackjack.drawLoading)
 
     return (
         <>
@@ -12,10 +15,18 @@ export default function PlayerPile({ cards, handValue }: { cards: CardType[], ha
                 </div>
                 <div className="grid grid-flow-col justify-start h-36 backdrop-blur-lg shadow-inner border border-white/10 items-center p-4 rounded-xl">
                     {
-                        cards.length > 0 ? cards.map((card: CardType, index: number) => {
+                        cards.length > 0 && cards.map((card: CardType, index: number) => {
                             return <img className="max-h-28" key={index} src={card.image} />
-                        }) : <p className="flex justify-center w-full text-[#9ca3af]">No cards yet</p>
+                        })
                     }
+
+                    {
+                        player === drawLoading.player && drawLoading.cardCount > 0 &&
+                        Array.from({ length: drawLoading.cardCount }, (_, index) => (
+                            <Loader key={index} />
+                        ))
+                    }
+
                 </div>
             </div>
         </>
