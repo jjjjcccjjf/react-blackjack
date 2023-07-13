@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { RootState } from '../redux/store'
 import { useSelector, useDispatch } from 'react-redux'
-import { setDeckId, setGameState, calculateHandValueAsync, setPile, setCurrentStreak, setBestStreak, initializeGame, addToGameLogs, setDrawLoading, setMusic, setLastEventSfx } from '../redux/slices/blackjackSlice'
+import { setDeckId, setGameState, calculateHandValueAsync, addToPileAsync, drawAsync, setPile, setCurrentStreak, setBestStreak, initializeGame, addToGameLogs, setDrawLoading, setMusic, setLastEventSfx } from '../redux/slices/blackjackSlice'
 import Button from '../components/Button'
 import PlayerPile from '../components/PlayerPile'
 import { determineWinner, stringifyPile, hasSoftHand } from '../helpers'
@@ -10,7 +10,8 @@ import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit'
 import Logs from '../components/Logs'
 import clickSfx from '../assets/click.mp3'
 import SfxManager from '../components/Managers/SfxManager'
-import {FaPaperPlane} from 'react-icons/fa'
+import { FaPaperPlane } from 'react-icons/fa'
+import { DrawResponseType } from '../types'
 
 const api = new ApiHelper()
 
@@ -26,7 +27,7 @@ export default function Game() {
     const currentStreak = useSelector((state: RootState) => state.blackjack.currentStreak)
     const isMusicPlaying = useSelector((state: RootState) => state.blackjack.music.isPlaying)
 
-    const dispatch = useDispatch()
+    const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch()
 
     useEffect(() => {
         clickAudio.volume = 0.25
@@ -53,7 +54,7 @@ export default function Game() {
                 case 'PLAYER_TURN':
                     break;
                 case 'DEALER_TURN': {
-                    await handleDrawClick(2, "dealer");
+                    await handleDrawClick2(2, "dealer");
                     break;
                 }
                 case 'CHECK_WINNERS': {
@@ -100,8 +101,8 @@ export default function Game() {
 
     useEffect(() => {
         if (gameState === 'DEALER_TURN') {
-            if (dealer.handValue < 17 ) { // || hasSoftHand(dealer.pile, dealer.handValue)
-                setTimeout(() => handleDrawClick(1, "dealer"), 200) // check bug sa ALAS
+            if (dealer.handValue < 17) { // || hasSoftHand(dealer.pile, dealer.handValue)
+                setTimeout(() => handleDrawClick2(1, "dealer"), 200) // check bug sa ALAS
             } else {
                 dispatch(addToGameLogs('DEALER stands.'))
                 dispatch(setGameState('CHECK_WINNERS'))
@@ -110,20 +111,17 @@ export default function Game() {
         }
     }, [dealer.handValue])
 
-    const handleDrawClick = async (drawCount: number, player: 'dealer' | 'player') => {
-        await dispatch(setDrawLoading({ player: player, cardCount: drawCount }))
+    const handleDrawClick2 = async (drawCount: number, playerName: 'player' | 'dealer') => {
+
         try {
-            const drawResponse = await api.draw(deckId, player, drawCount)
-            await (dispatch(addToGameLogs(`${player.toUpperCase()} drew ${drawCount} card(s).`)))
-            const stringifiedCards = await stringifyPile(drawResponse.cards)
-            const added = await api.addToPile(deckId, player, stringifiedCards)
-            await dispatch(addToGameLogs(added))
-            const listPileResponse = await api.listPile(deckId, player)
-            await dispatch(setPile({ pile: listPileResponse.piles[player].cards, player: player }))
-            await (dispatch as ThunkDispatch<RootState, void, AnyAction>)(calculateHandValueAsync(player))
+            const drawAction = await dispatch(drawAsync({ deckId, drawCount, playerName })) // gamelogs in fulfilled // pending - add cardloading
+            const drawPayload = drawAction.payload as DrawResponseType
+            const stringifiedCards = await stringifyPile(drawPayload.cards)
+            const addToPileAction = await dispatch(addToPileAsync({ deckId, playerName, stringifiedCards })) // add logs here added to hand // remove cardloading
+            const listPileResponse = await api.listPile(deckId, playerName)
+            await dispatch(setPile({ pile: listPileResponse.piles[playerName].cards, player: playerName }))
+            await dispatch(calculateHandValueAsync(playerName))
             await dispatch(setDrawLoading({ player: null, cardCount: 0 }))
-            return listPileResponse.success
-            //todo: fix dealer sometimes not hitting
         } catch (e) {
             console.error(e)
             throw e;
@@ -150,7 +148,8 @@ export default function Game() {
 
                         <Button onClick={async () => {
                             clickAudio.play()
-                            handleDrawClick(2, "player")
+                            // await (dispatch as ThunkDispatch<RootState, void, AnyAction>)(handleDrawClickAsync({ drawCount: 2, player: "player" }))
+                            handleDrawClick2(2, "player")
                             dispatch(setGameState('PLAYER_TURN'))
                             dispatch(setLastEventSfx('HIT'))
                             if (!isMusicPlaying) {
@@ -162,9 +161,11 @@ export default function Game() {
                     }
                     {
                         player.pile.length >= 2 && gameState === 'PLAYER_TURN' &&
-                        <Button onClick={() => {
+                        <Button onClick={async () => {
                             clickAudio.play()
-                            handleDrawClick(1, "player")
+                            // await (dispatch as ThunkDispatch<RootState, void, AnyAction>)(handleDrawClickAsync({ drawCount: 1, player: "player" }))
+
+                            handleDrawClick2(1, "player")
                         }}>
                             HIT
                         </Button>
@@ -189,10 +190,10 @@ export default function Game() {
                             CONTINUE
                         </Button>
                     }
-                                        {
+                    {
                         gameState === 'END_GAME' &&
                         <Button>
-                            SHARE <FaPaperPlane/>
+                            SHARE <FaPaperPlane />
                         </Button>
                     }
 
