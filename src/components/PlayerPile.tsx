@@ -11,7 +11,7 @@ export default function PlayerPile({ cards, handValue, player }: { cards: CardTy
             <div className="text-white flex flex-col gap-2">
 
                 <div>
-                    <p className="font-medium text-xl ">Your hand value: {handValue}</p>
+                    <p className="font-medium text-xl ">{player.charAt(0).toUpperCase() + player.slice(1)} hand value: {handValue}</p>
                 </div>
                 <div className="grid grid-flow-col justify-start h-36 backdrop-blur-lg shadow-inner border border-white/10 items-center p-4 rounded-xl">
                     {

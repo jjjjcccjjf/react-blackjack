@@ -14,6 +14,8 @@ type MusicType = {
     volume: number
 }
 
+type LastEventSfxType = "HIT" | "STAND" | "BLACKJACK" | "PLAYER_BLACKJACK" | "DEALER_BLACKJACK" | "BUST" | "TIE" | "PLAYER_WIN" | "DEALER_WIN" | "GAME_START" | "WELCOME" | null
+
 interface BlackjackState {
     deckId: string;
     players: {
@@ -24,7 +26,8 @@ interface BlackjackState {
     currentStreak: number,
     gameLogs: string[],
     drawLoading: drawLoading,
-    music: MusicType
+    music: MusicType,
+    lastEventSfx: LastEventSfxType
 }
 
 export const calculateHandValueAsync = createAsyncThunk(
@@ -68,7 +71,8 @@ const initializeState = (): BlackjackState => {
         music: {
             isPlaying: false,
             volume: 1
-        }
+        },
+        lastEventSfx: null
     };
 };
 
@@ -116,20 +120,29 @@ export const blackjackSlice = createSlice({
         },
         setMusic: (state, action: PayloadAction<MusicType>) => {
             state.music = action.payload
+        },
+        setLastEventSfx: (state, action: PayloadAction<LastEventSfxType>) => {
+            state.lastEventSfx = action.payload
         }
     },
-extraReducers: (builder) => {
-    builder.addCase(calculateHandValueAsync.fulfilled, (state, action: PayloadAction<{ handValue: number, player: string }>) => {
-        const { handValue, player } = action.payload
-        state.players[player].handValue = handValue
-        if (handValue === 21) {
-            state.gameLogs.push(`${player.toUpperCase()} blackjack!`)
-        }
-    });
-}
+    extraReducers: (builder) => {
+        builder.addCase(calculateHandValueAsync.fulfilled, (state, action: PayloadAction<{ handValue: number, player: string }>) => {
+            const { handValue, player } = action.payload
+            state.players[player].handValue = handValue
+            if (handValue === 21) {
+                state.gameLogs.push(`${player.toUpperCase()} blackjack!`)
+                state.lastEventSfx = (player === 'player') ? 'PLAYER_BLACKJACK' : 'DEALER_BLACKJACK'
+            }
+            if (handValue > 21 && player === 'player') {
+                state.gameLogs.push(`${player.toUpperCase()} busts at ${handValue}`)
+                // state.lastEventSfx = (player === 'player') ? 'PLAYER_BUST' : 'DEALER_BUST'
+                state.lastEventSfx = 'BUST'
+            }
+        });
+    }
 })
 
-export const { setDeckId, setGameState, setPile, setCurrentStreak, setBestStreak, initializeGame, addToGameLogs, setDrawLoading, setMusic } = blackjackSlice.actions
+export const { setDeckId, setGameState, setPile, setCurrentStreak, setBestStreak, initializeGame, addToGameLogs, setDrawLoading, setMusic, setLastEventSfx } = blackjackSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
 // export const selectCount = (state: RootState) => state.counter.value
