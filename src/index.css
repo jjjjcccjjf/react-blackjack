@@ -71,25 +71,25 @@ body {
 
 @keyframes shuffle {
     0% {
-        transform: translateX(0);
+      transform: translateX(0) rotate(0deg);
     }
-
+  
     25% {
-        transform: translateX(-50%);
+      transform: translateX(-50%) rotate(-10deg);
     }
-
+  
     50% {
-        transform: translateX(0);
+      transform: translateX(0) rotate(0deg);
     }
-
+  
     75% {
-        transform: translateX(50%);
+      transform: translateX(50%) rotate(10deg);
     }
-
+  
     100% {
-        transform: translateX(0);
+      transform: translateX(0) rotate(0deg);
     }
-}
+  }
 
 .reverseShuffler {
     position: relative;
@@ -107,23 +107,23 @@ body {
   
   @keyframes reverse-shuffle {
     0% {
-      transform: translateX(0);
+      transform: translateX(0) rotate(0deg);
     }
   
     25% {
-      transform: translateX(50%);
+      transform: translateX(50%) rotate(10deg);
     }
   
     50% {
-      transform: translateX(0);
+      transform: translateX(0) rotate(0deg);
     }
   
     75% {
-      transform: translateX(-50%);
+      transform: translateX(-50%) rotate(-10deg);
     }
   
     100% {
-      transform: translateX(0);
+      transform: translateX(0) rotate(0deg);
     }
   }
   

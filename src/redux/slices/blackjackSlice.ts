@@ -24,6 +24,18 @@ interface DrawPayload {
     playerName: 'player' | 'dealer'; //TODO: FIX THIS LATER
 }
 
+interface DisabledButtonsStateTypes {
+    hit: boolean
+    stand: boolean
+    dealHand: boolean
+}
+
+const DEFAULT_DISABLED_BUTTONS_STATE = {
+    hit: false,
+    stand: false,
+    dealHand: false
+}
+
 type LastEventSfxType = "HIT" | "STAND" | "BLACKJACK" | "PLAYER_BLACKJACK" | "DEALER_BLACKJACK" | "BUST" | "TIE" | "PLAYER_WIN" | "DEALER_TURN" | "PLAYER_TURN" | "DEALER_WIN" | "GAME_START" | "WELCOME" | null
 
 interface BlackjackState {
@@ -38,7 +50,8 @@ interface BlackjackState {
     drawLoading: drawLoading,
     music: MusicType,
     lastEventSfx: LastEventSfxType,
-    isDeckShuffling: boolean
+    isDeckShuffling: boolean,
+    disabledButtons: DisabledButtonsStateTypes
 }
 
 export const calculateHandValueAsync = createAsyncThunk(
@@ -113,7 +126,8 @@ const initializeState = (): BlackjackState => {
             volume: 1
         },
         lastEventSfx: null,
-        isDeckShuffling: false
+        isDeckShuffling: false,
+        disabledButtons: DEFAULT_DISABLED_BUTTONS_STATE
     };
 };
 
@@ -182,15 +196,23 @@ export const blackjackSlice = createSlice({
                     state.gameLogs.push(`${player.toUpperCase()} blackjack!`)
                     state.lastEventSfx = (player === 'player') ? 'PLAYER_BLACKJACK' : 'DEALER_BLACKJACK'
                 }
-                if (handValue > 21 && player === 'player') {
-                    state.gameLogs.push(`${player.toUpperCase()} busts at ${handValue}`)
-                    // state.lastEventSfx = (player === 'player') ? 'PLAYER_BUST' : 'DEALER_BUST'
-                    state.lastEventSfx = 'BUST'
+                if (handValue > 21) {
+                    if (player === 'player') {
+                        state.lastEventSfx = 'BUST'
+                        // state.lastEventSfx = (player === 'player') ? 'PLAYER_BUST' : 'DEALER_BUST'
+                    }
+                    state.gameLogs.push(`${player.toUpperCase()} busts at ${handValue}.`)
                 }
             })
             .addCase(drawAsync.pending, (state, action) => {
                 const { drawCount, playerName } = action.meta.arg
                 state.drawLoading = { cardCount: drawCount, player: playerName }
+
+                if (drawCount === 2) {
+                    state.disabledButtons.dealHand = true
+                } else if (drawCount === 1) {
+                    state.disabledButtons.hit = true
+                }
             })
             .addCase(drawAsync.fulfilled, (state, action) => {
                 const { drawCount, playerName } = action.meta.arg
@@ -198,13 +220,14 @@ export const blackjackSlice = createSlice({
             })
             .addCase(addToPileAsync.fulfilled, (state, action) => {
                 state.gameLogs.push(action.payload) // 6S, 2S added to PLAYER's hand.
+                state.disabledButtons = DEFAULT_DISABLED_BUTTONS_STATE
             })
             .addCase(shuffleDeckAsync.pending, (state) => {
                 state.gameLogs.push('Shuffling deck...')
                 state.isDeckShuffling = true;
             })
             .addCase(shuffleDeckAsync.fulfilled, (state, action) => {
-                    state.isDeckShuffling = false;
+                state.isDeckShuffling = false;
                 state.deckId = action.payload
                 state.gameLogs.push('Deck reshuffled.')
                 state.gameState = 'PLAYER_TURN'

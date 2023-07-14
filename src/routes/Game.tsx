@@ -30,6 +30,7 @@ export default function Game() {
     const bestStreak = useSelector((state: RootState) => state.blackjack.bestStreak)
     const currentStreak = useSelector((state: RootState) => state.blackjack.currentStreak)
     const isMusicPlaying = useSelector((state: RootState) => state.blackjack.music.isPlaying)
+    const disabledButtons = useSelector((state: RootState) => state.blackjack.disabledButtons)
 
     const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch()
 
@@ -172,7 +173,7 @@ export default function Game() {
                             handleDrawClick(2, "player")
                             dispatch(setGameState('PLAYER_TURN'))
                             dispatch(setLastEventSfx('HIT'))
-                        }} className="">
+                        }} disabled={disabledButtons.dealHand}>
                             DEAL HAND
                         </Button>
                     }
@@ -184,7 +185,7 @@ export default function Game() {
                             dispatch(setLastEventSfx('HIT'))
 
                             handleDrawClick(1, "player")
-                        }}>
+                        }} disabled={disabledButtons.hit}>
                             HIT
                         </Button>
 
