@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import type { RootState } from '../redux/store'
 import { useSelector, useDispatch } from 'react-redux'
-import { setDeckId, setGameState, calculateHandValueAsync, addToPileAsync, drawAsync, setPile, setCurrentStreak, setBestStreak, initializeGame, addToGameLogs, setDrawLoading, setMusic, setLastEventSfx } from '../redux/slices/blackjackSlice'
+import { setDeckId, shuffleDeckAsync, setGameState, calculateHandValueAsync, addToPileAsync, drawAsync, setPile, setCurrentStreak, setBestStreak, initializeGame, addToGameLogs, setDrawLoading, setMusic, setLastEventSfx } from '../redux/slices/blackjackSlice'
 import Button from '../components/Button'
 import PlayerPile from '../components/PlayerPile'
 import { determineWinner, stringifyPile, hasSoftHand } from '../helpers'
@@ -12,6 +12,9 @@ import clickSfx from '../assets/click.mp3'
 import SfxManager from '../components/Managers/SfxManager'
 import { FaPaperPlane } from 'react-icons/fa'
 import { DrawResponseType } from '../types'
+import Loader from '../components/Loader'
+import Shuffler from '../components/Shuffler'
+import Deck from '../components/Deck'
 
 const api = new ApiHelper()
 
@@ -33,7 +36,7 @@ export default function Game() {
     const [dealerLastHandCount, setDealerLastHandCount] = useState(dealer.pile.length)
 
     useEffect(() => {
-        clickAudio.volume = 0.25
+        clickAudio.volume = 0.33
     }, [])
 
     useEffect(() => {
@@ -45,17 +48,21 @@ export default function Game() {
 
             switch (gameState) {
                 case 'INIT_GAME': {
-                    if (!deckId) {
-                        const newDeckId = await api.getNewDeck()
-                        await dispatch(addToGameLogs('Shuffling deck...'))
-                        dispatch(setDeckId(newDeckId))
-                        localStorage.setItem('deckId', newDeckId)
-                    } else {
-                        await dispatch(addToGameLogs('Shuffling deck...'))
-                        await api.shuffleDeck(deckId)
-                    }
-                    dispatch(setGameState('PLAYER_TURN'))
-                    dispatch(addToGameLogs('Deck reshuffled.'))
+                    // if (!deckId) {
+                    //     const newDeckId = await api.getNewDeck()
+                    //     await dispatch(addToGameLogs('Shuffling deck...'))
+                    //     dispatch(setDeckId(newDeckId))
+                    //     localStorage.setItem('deckId', newDeckId)
+                    // } else {
+                    //     await dispatch(addToGameLogs('Shuffling deck...'))
+                    //     await api.shuffleDeck(deckId)
+                    // }
+                    // dispatch(setGameState('PLAYER_TURN'))
+                    // dispatch(addToGameLogs('Deck reshuffled.'))
+                    const shuffleDeckAction = await dispatch(shuffleDeckAsync())
+                    const newDeckId = shuffleDeckAction.payload as string
+                    localStorage.setItem('deckId', newDeckId)
+
                     break;
                 }
                 case 'PLAYER_TURN':
@@ -143,14 +150,13 @@ export default function Game() {
         <>
             <div className="flex flex-col items-center justify-center gap-8 h-full pb-36">
 
-                <div className="h-20">
-                    <img src="https://deckofcardsapi.com/static/img/back.png" className="max-h-28" />
-                    {/* <Loader></Loader> */}
+                <div className="h-28 w-full px-4">
+                    <Deck />
                 </div>
-                <div className="w-full p-4">
+                <div className="w-full px-4">
                     <PlayerPile cards={dealer.pile} handValue={dealer.handValue} player='dealer'></PlayerPile>
                 </div>
-                <div className="w-full p-4">
+                <div className="w-full px-4">
                     <PlayerPile cards={player.pile} handValue={player.handValue} player='player'></PlayerPile>
                 </div>
                 <div className="flex flex-row justify-center gap-8 items-center h-16">

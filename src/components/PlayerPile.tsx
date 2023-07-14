@@ -23,7 +23,7 @@ export default function PlayerPile({ cards, handValue, player }: { cards: CardTy
                     {
                         player === drawLoading.player && drawLoading.cardCount > 0 &&
                         Array.from({ length: drawLoading.cardCount }, (_, index) => (
-                            <Loader key={index} />
+                            <Loader className="loader" key={index} />
                         ))
                     }
 

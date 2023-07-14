@@ -37,7 +37,8 @@ interface BlackjackState {
     gameLogs: string[],
     drawLoading: drawLoading,
     music: MusicType,
-    lastEventSfx: LastEventSfxType
+    lastEventSfx: LastEventSfxType,
+    isDeckShuffling: boolean
 }
 
 export const calculateHandValueAsync = createAsyncThunk(
@@ -111,7 +112,8 @@ const initializeState = (): BlackjackState => {
             isPlaying: false,
             volume: 1
         },
-        lastEventSfx: null
+        lastEventSfx: null,
+        isDeckShuffling: false
     };
 };
 
@@ -164,6 +166,9 @@ export const blackjackSlice = createSlice({
         },
         setLastEventSfx: (state, action: PayloadAction<LastEventSfxType>) => {
             state.lastEventSfx = action.payload
+        },
+        setIsDeckShuffling: (state, action: PayloadAction<boolean>) => {
+            state.isDeckShuffling = action.payload
         }
     },
     extraReducers: (builder) => {
@@ -172,7 +177,7 @@ export const blackjackSlice = createSlice({
                 const { handValue, player } = action.payload
                 state.players[player].handValue = handValue
                 state.players[player].pileCount = state.players[player].pile.length
-                
+
                 if (handValue === 21) {
                     state.gameLogs.push(`${player.toUpperCase()} blackjack!`)
                     state.lastEventSfx = (player === 'player') ? 'PLAYER_BLACKJACK' : 'DEALER_BLACKJACK'
@@ -196,8 +201,10 @@ export const blackjackSlice = createSlice({
             })
             .addCase(shuffleDeckAsync.pending, (state) => {
                 state.gameLogs.push('Shuffling deck...')
+                state.isDeckShuffling = true;
             })
             .addCase(shuffleDeckAsync.fulfilled, (state, action) => {
+                    state.isDeckShuffling = false;
                 state.deckId = action.payload
                 state.gameLogs.push('Deck reshuffled.')
                 state.gameState = 'PLAYER_TURN'
