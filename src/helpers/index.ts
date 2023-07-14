@@ -97,7 +97,7 @@ const bustedCompare = (playerHandValue: number, dealerHandValue: number): Winner
 }
 
 const hasSoftHand = (pile: CardType[], handValue: number) => {
-    return pile.some((card) => card.value === 'ACE') && pile.length === 2 && handValue !== 21
+    return pile.some((card) => card.value === 'ACE') && pile.length === 2 && handValue !== 21 && handValue < 20 // make dealer stand on 20 draw pa pag soft 20 else <19 HIT
 }
 
 export { getRawHandValue, getCalculatedHandValue, checkBlackJack, stringifyPile, determineWinner, standCompare, bustedCompare, hasSoftHand }

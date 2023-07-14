@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import type { RootState } from '../redux/store'
 import { useSelector, useDispatch } from 'react-redux'
 import { setDeckId, setGameState, calculateHandValueAsync, addToPileAsync, drawAsync, setPile, setCurrentStreak, setBestStreak, initializeGame, addToGameLogs, setDrawLoading, setMusic, setLastEventSfx } from '../redux/slices/blackjackSlice'
@@ -19,6 +19,7 @@ export default function Game() {
 
     const [clickAudio] = useState(new Audio(clickSfx))
 
+
     const deckId = useSelector((state: RootState) => state.blackjack.deckId)
     const player = useSelector((state: RootState) => state.blackjack.players.player)
     const dealer = useSelector((state: RootState) => state.blackjack.players.dealer)
@@ -29,9 +30,15 @@ export default function Game() {
 
     const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch()
 
+    const [dealerLastHandCount, setDealerLastHandCount] = useState(dealer.pile.length)
+
     useEffect(() => {
         clickAudio.volume = 0.25
     }, [])
+
+    useEffect(() => {
+        localStorage.setItem('deckId', deckId);
+    }, [deckId]);
 
     useEffect(() => {
         const manageGameState = async () => {
@@ -54,7 +61,8 @@ export default function Game() {
                 case 'PLAYER_TURN':
                     break;
                 case 'DEALER_TURN': {
-                    await handleDrawClick2(2, "dealer");
+                    await handleDrawClick(2, "dealer");
+                    // dispatch(setLastEventSfx('DEALER_TURN'))
                     break;
                 }
                 case 'CHECK_WINNERS': {
@@ -100,18 +108,21 @@ export default function Game() {
     }, [gameState, dispatch]) // check if dispatch here is needed
 
     useEffect(() => {
-        if (gameState === 'DEALER_TURN') {
-            if (dealer.handValue < 17) { // || hasSoftHand(dealer.pile, dealer.handValue)
-                setTimeout(() => handleDrawClick2(1, "dealer"), 200) // check bug sa ALAS
+
+        if (gameState === 'DEALER_TURN') { //&& dealerLastHandCount.current !== dealer.pile.length
+            if (dealer.handValue < 17 || hasSoftHand(dealer.pile, dealer.handValue)) { // 
+                setTimeout(() => handleDrawClick(1, "dealer"), 200) // check bug sa ALAS
             } else {
                 dispatch(addToGameLogs('DEALER stands.'))
                 dispatch(setGameState('CHECK_WINNERS'))
-
             }
         }
-    }, [dealer.handValue])
 
-    const handleDrawClick2 = async (drawCount: number, playerName: 'player' | 'dealer') => {
+        // setDealerLastHandCount(dealer.pile.length)
+
+    }, [dealer.pileCount, dispatch])
+
+    const handleDrawClick = async (drawCount: number, playerName: 'player' | 'dealer') => {
 
         try {
             const drawAction = await dispatch(drawAsync({ deckId, drawCount, playerName })) // gamelogs in fulfilled // pending - add cardloading
@@ -149,12 +160,12 @@ export default function Game() {
                         <Button onClick={async () => {
                             clickAudio.play()
                             // await (dispatch as ThunkDispatch<RootState, void, AnyAction>)(handleDrawClickAsync({ drawCount: 2, player: "player" }))
-                            handleDrawClick2(2, "player")
-                            dispatch(setGameState('PLAYER_TURN'))
-                            dispatch(setLastEventSfx('HIT'))
                             if (!isMusicPlaying) {
                                 dispatch(setMusic({ isPlaying: true, volume: 1 }))
                             }
+                            handleDrawClick(2, "player")
+                            dispatch(setGameState('PLAYER_TURN'))
+                            dispatch(setLastEventSfx('HIT'))
                         }} className="">
                             DEAL HAND
                         </Button>
@@ -164,8 +175,9 @@ export default function Game() {
                         <Button onClick={async () => {
                             clickAudio.play()
                             // await (dispatch as ThunkDispatch<RootState, void, AnyAction>)(handleDrawClickAsync({ drawCount: 1, player: "player" }))
+                            dispatch(setLastEventSfx('HIT'))
 
-                            handleDrawClick2(1, "player")
+                            handleDrawClick(1, "player")
                         }}>
                             HIT
                         </Button>
@@ -175,9 +187,9 @@ export default function Game() {
                         player.pile.length >= 2 && gameState === 'PLAYER_TURN' &&
                         <Button onClick={() => {
                             clickAudio.play()
+                            dispatch(setLastEventSfx('STAND'))
                             dispatch(setGameState('DEALER_TURN'))
                             dispatch(addToGameLogs('PLAYER stands.'))
-                            dispatch(setLastEventSfx('STAND'))
                         }}>
                             STAND
                         </Button>

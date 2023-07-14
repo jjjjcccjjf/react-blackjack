@@ -9,6 +9,7 @@ const api = new ApiHelper()
 
 interface PlayerState {
     pile: CardType[],
+    pileCount: number,
     handValue: number,
 }
 
@@ -23,7 +24,7 @@ interface DrawPayload {
     playerName: 'player' | 'dealer'; //TODO: FIX THIS LATER
 }
 
-type LastEventSfxType = "HIT" | "STAND" | "BLACKJACK" | "PLAYER_BLACKJACK" | "DEALER_BLACKJACK" | "BUST" | "TIE" | "PLAYER_WIN" | "DEALER_WIN" | "GAME_START" | "WELCOME" | null
+type LastEventSfxType = "HIT" | "STAND" | "BLACKJACK" | "PLAYER_BLACKJACK" | "DEALER_BLACKJACK" | "BUST" | "TIE" | "PLAYER_WIN" | "DEALER_TURN" | "PLAYER_TURN" | "DEALER_WIN" | "GAME_START" | "WELCOME" | null
 
 interface BlackjackState {
     deckId: string;
@@ -57,6 +58,19 @@ export const calculateHandValueAsync = createAsyncThunk(
     }
 )
 
+export const shuffleDeckAsync = createAsyncThunk(
+    'blackjack/shuffleDeckAsync',
+    async (_, thunkAPI): Promise<string> => {
+        const state = thunkAPI.getState() as RootState
+
+        if (!state.blackjack.deckId) {
+            return await api.getNewDeck()
+        } else {
+            return await api.shuffleDeck(state.blackjack.deckId)
+        }
+    }
+)
+
 export const drawAsync = createAsyncThunk(
     'blackjack/drawAsync',
     async ({ deckId, drawCount, playerName }: DrawPayload): Promise<DrawResponseType> => {
@@ -71,34 +85,6 @@ export const addToPileAsync = createAsyncThunk(
     }
 )
 
-// export const handleDrawClickAsync = createAsyncThunk(
-//     'blackjack/handleDrawClickAsync',
-//     async ({ drawCount, player }: DrawPayload, thunkAPI) => {
-//         const state = thunkAPI.getState() as RootState
-
-//         // await dispatch(setDrawLoading({ player: player, cardCount: drawCount }))
-//         try {
-//             const drawResponse = await api.draw(state.blackjack.deckId, player, drawCount)
-//             thunkAPI.dispatch(addToGameLogs(`${player.toUpperCase()} drew ${drawCount} card(s).`))
-//             const stringifiedCards = await stringifyPile(drawResponse.cards)
-//             const added = await api.addToPile(state.blackjack.deckId, player, stringifiedCards)
-//             thunkAPI.dispatch(addToGameLogs(added))
-//             const listPileResponse = await api.listPile(state.blackjack.deckId, player)
-//             await thunkAPI.dispatch(setPile({ pile: listPileResponse.piles[player].cards, player: player }))
-
-//             const handArray = await getRawHandValue(state.blackjack.players[player].pile)
-//             const handValue = await getCalculatedHandValue(handArray)
-
-//             console.log(`${player}'s hand value: ${handValue}`);
-
-//             return { player, handValue }
-//         } catch (e) {
-//             console.error(e)
-//             throw e;
-//         }
-//     }
-// )
-
 const initializeState = (): BlackjackState => {
     const deckId = localStorage.getItem('deckId')
     const bestStreak = localStorage.getItem('bestStreak')
@@ -107,10 +93,12 @@ const initializeState = (): BlackjackState => {
         players: {
             "player": {
                 pile: [],
+                pileCount: 0,
                 handValue: 0
             },
             "dealer": {
                 pile: [],
+                pileCount: 0,
                 handValue: 0
             },
         },
@@ -158,10 +146,12 @@ export const blackjackSlice = createSlice({
             state.players = {
                 "player": {
                     pile: [],
+                    pileCount: 0,
                     handValue: 0
                 },
                 "dealer": {
                     pile: [],
+                    pileCount: 0,
                     handValue: 0
                 },
             }
@@ -181,6 +171,8 @@ export const blackjackSlice = createSlice({
             .addCase(calculateHandValueAsync.fulfilled, (state, action: PayloadAction<{ handValue: number, player: string }>) => {
                 const { handValue, player } = action.payload
                 state.players[player].handValue = handValue
+                state.players[player].pileCount = state.players[player].pile.length
+                
                 if (handValue === 21) {
                     state.gameLogs.push(`${player.toUpperCase()} blackjack!`)
                     state.lastEventSfx = (player === 'player') ? 'PLAYER_BLACKJACK' : 'DEALER_BLACKJACK'
@@ -202,6 +194,15 @@ export const blackjackSlice = createSlice({
             .addCase(addToPileAsync.fulfilled, (state, action) => {
                 state.gameLogs.push(action.payload) // 6S, 2S added to PLAYER's hand.
             })
+            .addCase(shuffleDeckAsync.pending, (state) => {
+                state.gameLogs.push('Shuffling deck...')
+            })
+            .addCase(shuffleDeckAsync.fulfilled, (state, action) => {
+                state.deckId = action.payload
+                state.gameLogs.push('Deck reshuffled.')
+                state.gameState = 'PLAYER_TURN'
+            })
+
 
     }
 })
