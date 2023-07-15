@@ -221,6 +221,7 @@ export const blackjackSlice = createSlice({
             .addCase(addToPileAsync.fulfilled, (state, action) => {
                 state.gameLogs.push(action.payload) // 6S, 2S added to PLAYER's hand.
                 state.disabledButtons = DEFAULT_DISABLED_BUTTONS_STATE
+                state.drawLoading = { player: null, cardCount: 0 }
             })
             .addCase(shuffleDeckAsync.pending, (state) => {
                 state.gameLogs.push('Shuffling deck...')

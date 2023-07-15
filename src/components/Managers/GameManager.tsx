@@ -3,20 +3,23 @@ import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit'
 import { RootState } from "../../redux/store"
 import { useEffect } from "react"
 import { getRawHandValue, getCalculatedHandValue } from "../../helpers"
-import { setDeckId, setGameState, calculateHandValueAsync, shuffleDeckAsync, addToPileAsync, drawAsync, setPile, setCurrentStreak, setBestStreak, initializeGame, addToGameLogs, setDrawLoading, setMusic, setLastEventSfx } from '../redux/slices/blackjackSlice'
-import { determineWinner } from "../../helpers"
+import { setDeckId, setGameState, calculateHandValueAsync, shuffleDeckAsync, addToPileAsync, drawAsync, setPile, setCurrentStreak, setBestStreak, initializeGame, addToGameLogs, setDrawLoading, setMusic, setLastEventSfx } from '../../redux/slices/blackjackSlice'
+import { determineWinner, hasSoftHand } from "../../helpers"
 
-type HandleDrawClickType = (drawCount: number, playerName: 'player' | 'dealer') => void // fix this later. add deckid
+type HandleDrawClickType = (deckId:string, drawCount: number, playerName: 'player' | 'dealer') => void // fix this later. add deckid
 
 type GameManagerProps = {
     handleDrawClick: HandleDrawClickType
 }
 
 export default function GameManager({ handleDrawClick }: GameManagerProps) {
+
     const deckId = useSelector((state: RootState) => state.blackjack.deckId)
     const gameState = useSelector((state: RootState) => state.blackjack.gameState)
     const dealer = useSelector((state: RootState) => state.blackjack.players.dealer)
     const player = useSelector((state: RootState) => state.blackjack.players.player)
+    const currentStreak = useSelector((state: RootState) => state.blackjack.currentStreak)
+    const bestStreak = useSelector((state: RootState) => state.blackjack.bestStreak)
 
     const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch()
 
@@ -24,18 +27,21 @@ export default function GameManager({ handleDrawClick }: GameManagerProps) {
         localStorage.setItem('deckId', deckId);
     }, [deckId]);
 
+
     useEffect(() => {
         const manageGameState = async () => {
 
             switch (gameState) {
                 case 'INIT_GAME': {
-                    await dispatch(shuffleDeckAsync())
+                    const shuffleDeckAction = await dispatch(shuffleDeckAsync())
+                    const newDeckId = shuffleDeckAction.payload as string
+                    localStorage.setItem('deckId', newDeckId)
                     break;
                 }
                 case 'PLAYER_TURN':
                     break;
                 case 'DEALER_TURN': {
-                    await handleDrawClick(2, "dealer");
+                    await handleDrawClick(deckId, 2, "dealer");
                     break;
                 }
                 case 'CHECK_WINNERS': {
@@ -78,19 +84,20 @@ export default function GameManager({ handleDrawClick }: GameManagerProps) {
         }
 
         manageGameState()
-    }, [gameState, dispatch]) // check if dispatch here is needed
+    }, [gameState, dispatch])
 
-    // useEffect(() => {
-    //     if (gameState === 'DEALER_TURN') {
-    //         if (dealer.handValue < 17) { // || hasSoftHand(dealer.pile, dealer.handValue)
-    //             setTimeout(() => handleDrawClick(1, "dealer"), 200) // check bug sa ALAS
-    //         } else {
-    //             dispatch(addToGameLogs('DEALER stands.'))
-    //             dispatch(setGameState('CHECK_WINNERS'))
+    useEffect(() => {
 
-    //         }
-    //     }
-    // }, [dealer.handValue])
+        if (gameState === 'DEALER_TURN') {
+            if (dealer.handValue < 17 || hasSoftHand(dealer.pile, dealer.handValue)) { // 
+                setTimeout(() => handleDrawClick(deckId, 1, "dealer"), 200) // check bug sa ALAS
+            } else {
+                dispatch(addToGameLogs('DEALER stands.'))
+                dispatch(setGameState('CHECK_WINNERS'))
+            }
+        }
+
+    }, [dealer.pileCount, dispatch])
 
     return (<></>)
 }

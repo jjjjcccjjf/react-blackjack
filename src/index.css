@@ -41,6 +41,22 @@ body {
     color: #fff;
 }
 
+
+.disabled {
+  background-color: #cccccc;
+  background-image: linear-gradient(180deg, hsla(0, 0%, 100%, .15), hsla(0, 0%, 100%, 0));
+  border-color: #999999;
+  color: #999999;
+}
+
+.disabled:focus, .disabled:hover {
+  background-color: #cccccc;
+  background-image: var(--bs-gradient);
+  border-color: #999999;
+  color: #999999;
+}
+
+
 .loader {
     animation: spin .7s infinite linear;
 }

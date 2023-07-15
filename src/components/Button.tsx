@@ -9,8 +9,12 @@ type ButtonProps = {
 };
 
 export default function Button({ children, disabled, className, onClick }: ButtonProps) {
+    // transition-transform hover:scale-[103%]
+    const classes = clsx("glassButton h-12 w-36 text-xl rounded-lg  flex flex-row justify-center items-center gap-2", 
+    disabled && 'cursor-not-allowed disabled', 
+    className)
 
-    const classes = clsx("glassButton h-12 w-36 text-xl rounded-lg transition-transform hover:scale-[103%] flex flex-row justify-center items-center gap-2", className)
+
     return (
         <>
             <button onClick={onClick} disabled={disabled} className={classes}>{children}</button>
