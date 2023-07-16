@@ -14,7 +14,7 @@ import { FaPaperPlane } from 'react-icons/fa'
 import { DrawResponseType } from '../types'
 import Deck from '../components/Deck'
 import GameManager from '../components/Managers/GameManager'
-import { Link, Outlet } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { AiFillHome, AiFillQuestionCircle } from 'react-icons/ai'
 import Music from '../components/Music'
 
@@ -46,7 +46,8 @@ export default function Game() {
             const drawAction = await dispatch(drawAsync({ deckId, drawCount, playerName })) // gamelogs in fulfilled // pending - add cardloading
             const drawPayload = drawAction.payload as DrawResponseType
             const stringifiedCards = await stringifyPile(drawPayload.cards)
-            const addToPileAction = await dispatch(addToPileAsync({ deckId, playerName, stringifiedCards })) // add logs here added to hand // remove cardloading
+            // const addToPileAction = 
+            await dispatch(addToPileAsync({ deckId, playerName, stringifiedCards })) // add logs here added to hand // remove cardloading
             const listPileResponse = await api.listPile(deckId, playerName)
             await dispatch(setPile({ pile: listPileResponse.piles[playerName].cards, player: playerName }))
             await dispatch(calculateHandValueAsync(playerName))

@@ -2,11 +2,10 @@ import { useSelector, useDispatch } from "react-redux"
 import { AnyAction, ThunkDispatch } from '@reduxjs/toolkit'
 import { RootState } from "../../redux/store"
 import { useEffect } from "react"
-import { getRawHandValue, getCalculatedHandValue } from "../../helpers"
-import { setDeckId, setGameState, calculateHandValueAsync, shuffleDeckAsync, addToPileAsync, drawAsync, setPile, setCurrentStreak, setBestStreak, initializeGame, addToGameLogs, setDrawLoading, setMusic, setLastEventSfx } from '../../redux/slices/blackjackSlice'
+import { setGameState, shuffleDeckAsync, setCurrentStreak, setBestStreak, addToGameLogs, setLastEventSfx } from '../../redux/slices/blackjackSlice'
 import { determineWinner, hasSoftHand } from "../../helpers"
 
-type HandleDrawClickType = (deckId:string, drawCount: number, playerName: 'player' | 'dealer') => void // fix this later. add deckid
+type HandleDrawClickType = (deckId: string, drawCount: number, playerName: 'player' | 'dealer') => void // fix this later. add deckid
 
 type GameManagerProps = {
     handleDrawClick: HandleDrawClickType

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { BiSolidVolumeFull } from 'react-icons/bi';
-import { BiSolidVolumeLow } from 'react-icons/bi';
 import { BiSolidVolume } from 'react-icons/bi';
 import bgmusic from '../assets/bgmusic.mp3';
 import { RootState } from '../redux/store';
