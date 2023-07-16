@@ -100,7 +100,8 @@ export const addToPileAsync = createAsyncThunk(
 )
 
 const initializeState = (): BlackjackState => {
-    const deckId = localStorage.getItem('deckId')
+    let deckId = localStorage.getItem('deckId') 
+    deckId = deckId === 'undefined' ? '' : deckId
     const bestStreak = localStorage.getItem('bestStreak')
     return {
         deckId: deckId ?? '',
