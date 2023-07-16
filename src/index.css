@@ -3,42 +3,43 @@
 @tailwind utilities;
 
 body {
-    /* @apply bg-[#e5e5e5]; */
+  /* @apply bg-[#e5e5e5]; */
 }
 
 /* Background styles */
 body {
-    background-image: url('assets/bg.png');
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: contain;
-    /* background-size: cover; */
+  /* background-image: url('assets/bg.png'); */
+  background-image: radial-gradient(circle, #002f5b, #001529);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+  /* background-size: cover; */
 }
 
 /* Glassmorphism card effect */
 .glass {
-    backdrop-filter: blur(16px) saturate(180%);
-    -webkit-backdrop-filter: blur(16px) saturate(180%);
-    background-color: rgba(17, 25, 40, 0.75);
-    /* border-radius: 12px; */
-    /* border-left: 1px solid rgba(255, 255, 255, 0.125);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  background-color: rgba(17, 25, 40, 0.75);
+  /* border-radius: 12px; */
+  /* border-left: 1px solid rgba(255, 255, 255, 0.125);
     border-right: 1px solid rgba(255, 255, 255, 0.125); */
 }
 
 .glassButton {
-    background-color: #2b6ca9;
-    background-image: linear-gradient(180deg, hsla(0, 0%, 100%, .15), hsla(0, 0%, 100%, 0));
-    border-color: #266499;
-    color: #fff;
+  background-color: #2b6ca9;
+  background-image: linear-gradient(180deg, hsla(0, 0%, 100%, .15), hsla(0, 0%, 100%, 0));
+  border-color: #266499;
+  color: #fff;
 }
 
 
 .glassButton:focus,
 .glassButton:hover {
-    background-color: #2b6ca9;
-    background-image: var(--bs-gradient);
-    border-color: #266499;
-    color: #fff;
+  background-color: #2b6ca9;
+  background-image: var(--bs-gradient);
+  border-color: #266499;
+  color: #fff;
 }
 
 
@@ -49,7 +50,8 @@ body {
   color: #999999;
 }
 
-.disabled:focus, .disabled:hover {
+.disabled:focus,
+.disabled:hover {
   background-color: #cccccc;
   background-image: var(--bs-gradient);
   border-color: #999999;
@@ -58,88 +60,105 @@ body {
 
 
 .loader {
-    animation: spin .7s infinite linear;
+  animation: spin .7s infinite linear;
 }
 
 @keyframes spin {
-    from {
-        transform: rotateY(0deg);
-    }
+  from {
+    transform: rotateY(0deg);
+  }
 
-    to {
-        transform: rotateY(360deg);
-    }
+  to {
+    transform: rotateY(360deg);
+  }
 }
 
 .shuffler {
-    position: relative;
-    /* Adjust the size as needed */
-    /* Adjust the size as needed */
+  position: relative;
+  /* Adjust the size as needed */
+  /* Adjust the size as needed */
 }
 
 .shuffler img {
-    position: absolute;
-    @apply max-h-28;
-    top: 0;
-    left: 0;
-    animation: shuffle 0.5s ease-in-out infinite;
+  position: absolute;
+  @apply max-h-28;
+  top: 0;
+  left: 0;
+  animation: shuffle 0.5s ease-in-out infinite;
 }
 
 @keyframes shuffle {
-    0% {
-      transform: translateX(0) rotate(0deg);
-    }
-  
-    25% {
-      transform: translateX(-50%) rotate(-10deg);
-    }
-  
-    50% {
-      transform: translateX(0) rotate(0deg);
-    }
-  
-    75% {
-      transform: translateX(50%) rotate(10deg);
-    }
-  
-    100% {
-      transform: translateX(0) rotate(0deg);
-    }
+  0% {
+    transform: translateX(0) rotate(0deg);
   }
 
+  25% {
+    transform: translateX(-50%) rotate(-10deg);
+  }
+
+  50% {
+    transform: translateX(0) rotate(0deg);
+  }
+
+  75% {
+    transform: translateX(50%) rotate(10deg);
+  }
+
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+}
+
 .reverseShuffler {
-    position: relative;
-    @apply max-h-28;
-    /* Adjust the size as needed */
-    /* Adjust the size as needed */
+  position: relative;
+  @apply max-h-28;
+  /* Adjust the size as needed */
+  /* Adjust the size as needed */
+}
+
+.reverseShuffler img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  animation: reverse-shuffle 0.5s ease-in-out infinite;
+}
+
+@keyframes reverse-shuffle {
+  0% {
+    transform: translateX(0) rotate(0deg);
   }
-  
-  .reverseShuffler img {
-    position: absolute;
-    top: 0;
-    left: 0;
-    animation: reverse-shuffle 0.5s ease-in-out infinite;
+
+  25% {
+    transform: translateX(50%) rotate(10deg);
   }
-  
-  @keyframes reverse-shuffle {
-    0% {
-      transform: translateX(0) rotate(0deg);
-    }
-  
-    25% {
-      transform: translateX(50%) rotate(10deg);
-    }
-  
-    50% {
-      transform: translateX(0) rotate(0deg);
-    }
-  
-    75% {
-      transform: translateX(-50%) rotate(-10deg);
-    }
-  
-    100% {
-      transform: translateX(0) rotate(0deg);
-    }
+
+  50% {
+    transform: translateX(0) rotate(0deg);
   }
-  
+
+  75% {
+    transform: translateX(-50%) rotate(-10deg);
+  }
+
+  100% {
+    transform: translateX(0) rotate(0deg);
+  }
+}
+
+@keyframes float-animation {
+  0% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+
+  100% {
+    transform: translateY(0);
+  }
+}
+
+.floaty {
+  animation: float-animation 2s ease-in-out infinite;
+}
