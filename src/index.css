@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  /* @apply bg-[#e5e5e5]; */
-}
-
 /* Background styles */
 body {
   /* background-image: url('assets/bg.png'); */

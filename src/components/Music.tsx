@@ -20,6 +20,10 @@ export default function Music() {
         if (music.isPlaying) {
             bgmusicAudio.play();
         }
+
+        return () => {
+            bgmusicAudio.pause();
+        }
     }, [music.isPlaying])
 
     useEffect(() => {
