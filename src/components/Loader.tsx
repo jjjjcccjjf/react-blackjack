@@ -6,7 +6,7 @@ export default function Loader({ className }: LoaderProp) {
     return (
         <>
             <div className={className}>
-                <img src="https://deckofcardsapi.com/static/img/back.png" className="max-h-28" alt="Loader" />
+                <img src="https://deckofcardsapi.com/static/img/back.png" className="tall:max-h-28 max-h-20" alt="Loader" />
             </div>
         </>
     )

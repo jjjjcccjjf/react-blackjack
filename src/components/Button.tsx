@@ -10,7 +10,7 @@ type ButtonProps = {
 
 export default function Button({ children, disabled, className, onClick }: ButtonProps) {
     // transition-transform hover:scale-[103%]
-    const classes = clsx("glassButton h-12 w-36 text-xl rounded-lg  flex flex-row justify-center items-center gap-2", 
+    const classes = clsx("glassButton h-12 w-32 text-lg tall:w-36 text-md tall:text-xl rounded-lg  flex flex-row justify-center items-center gap-2", 
     disabled && 'cursor-not-allowed disabled', 
     className)
 
