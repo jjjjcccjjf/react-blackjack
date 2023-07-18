@@ -35,7 +35,7 @@ export default function Logs() {
                 </div>
                 <div className="grid grid-flow-col bg-[#12192c]  p-2 grid-cols-6 items-center">
                     <div className="flex flex-col gap-1 justify-center items-center p-2 col-span-2">
-                        <img src="dealer.png" className="h-24 min-w-fit" />
+                        <img src="dealer.png" className="h-24 w-24" />
                         <p className="text-white/50 flex justify-center items-center">Mr. Dealer</p>
                     </div>
                     <div className="overflow-y-scroll h-32 px-3 text-sm col-span-4 text-white/50 border-l-white/10 border-l" ref={logs}>
