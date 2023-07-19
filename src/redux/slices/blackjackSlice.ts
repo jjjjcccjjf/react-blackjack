@@ -18,6 +18,11 @@ type MusicType = {
     volume: number
 }
 
+type BannerType = {
+    isVisible: boolean,
+    text: string
+}
+
 interface DrawPayload {
     deckId: string
     drawCount: number;
@@ -50,6 +55,7 @@ interface BlackjackState {
     drawLoading: drawLoading,
     music: MusicType,
     lastEventSfx: LastEventSfxType,
+    banner: BannerType,
     isDeckShuffling: boolean,
     disabledButtons: DisabledButtonsStateTypes
 }
@@ -100,7 +106,7 @@ export const addToPileAsync = createAsyncThunk(
 )
 
 const initializeState = (): BlackjackState => {
-    let deckId = localStorage.getItem('deckId') 
+    let deckId = localStorage.getItem('deckId')
     deckId = deckId === 'undefined' ? '' : deckId
     const bestStreak = localStorage.getItem('bestStreak')
     return {
@@ -128,7 +134,11 @@ const initializeState = (): BlackjackState => {
         },
         lastEventSfx: null,
         isDeckShuffling: false,
-        disabledButtons: DEFAULT_DISABLED_BUTTONS_STATE
+        disabledButtons: DEFAULT_DISABLED_BUTTONS_STATE,
+        banner: {
+            isVisible: false,
+            text: ''
+        }
     };
 };
 
@@ -184,6 +194,10 @@ export const blackjackSlice = createSlice({
         },
         setIsDeckShuffling: (state, action: PayloadAction<boolean>) => {
             state.isDeckShuffling = action.payload
+        },
+        setBanner: (state, action: PayloadAction<BannerType>) => {
+            const { isVisible, text } = action.payload
+            state.banner = { isVisible, text }
         }
     },
     extraReducers: (builder) => {
@@ -200,7 +214,6 @@ export const blackjackSlice = createSlice({
                 if (handValue > 21) {
                     if (player === 'player') {
                         state.lastEventSfx = 'BUST'
-                        // state.lastEventSfx = (player === 'player') ? 'PLAYER_BUST' : 'DEALER_BUST'
                     }
                     state.gameLogs.push(`${player.toUpperCase()} busts at ${handValue}.`)
                 }
@@ -239,7 +252,7 @@ export const blackjackSlice = createSlice({
     }
 })
 
-export const { setDeckId, setGameState, setPile, setCurrentStreak, setBestStreak, initializeGame, addToGameLogs, setDrawLoading, setMusic, setLastEventSfx } = blackjackSlice.actions
+export const { setDeckId, setGameState, setPile, setCurrentStreak, setBestStreak, setBanner, initializeGame, addToGameLogs, setDrawLoading, setMusic, setLastEventSfx } = blackjackSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
 // export const selectCount = (state: RootState) => state.counter.value

@@ -16,6 +16,7 @@ import Deck from '../components/Deck'
 import GameManager from '../components/Managers/GameManager'
 
 import Nav from '../components/Nav'
+import Banner from '../components/Banner'
 
 const api = new ApiHelper()
 
@@ -30,6 +31,7 @@ export default function Game() {
     const gameState = useSelector((state: RootState) => state.blackjack.gameState)
     const isMusicPlaying = useSelector((state: RootState) => state.blackjack.music.isPlaying)
     const disabledButtons = useSelector((state: RootState) => state.blackjack.disabledButtons)
+    const isDeckShuffling = useSelector((state: RootState) => state.blackjack.isDeckShuffling)
 
     const dispatch: ThunkDispatch<RootState, void, AnyAction> = useDispatch()
 
@@ -122,11 +124,15 @@ export default function Game() {
                                 SHARE <FaPaperPlane />
                             </Button>
                         }
+                        {
+                            isDeckShuffling && <p className=" text-lg tracking-wider">Shuffling Deck...</p>
+                        }
 
                     </div>
                     <Logs></Logs>
                     <SfxManager />
                     <GameManager handleDrawClick={handleDrawClick} />
+                    <Banner></Banner>
                 </div>
             </div>
         </>

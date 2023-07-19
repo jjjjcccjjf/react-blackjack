@@ -16,7 +16,7 @@ export default function Nav() {
                 <p className="h-10 flex justify-center items-center">🔥 Streak: {currentStreak}</p>
 
                 <Music />
-                <button className="flex justify-center items-center text-white/70 text-3xl hover:text-white/50"><AiFillQuestionCircle /></button>
+                <button className="flex justify-center items-center text-white/70 text-2xl tall:text-3xl hover:text-white/50"><AiFillQuestionCircle /></button>
             </div>
         </>
     )
