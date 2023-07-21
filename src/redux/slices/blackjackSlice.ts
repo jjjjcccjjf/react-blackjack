@@ -56,6 +56,7 @@ interface BlackjackState {
     music: MusicType,
     lastEventSfx: LastEventSfxType,
     banner: BannerType,
+    isTutorialVisible: boolean,
     isDeckShuffling: boolean,
     disabledButtons: DisabledButtonsStateTypes
 }
@@ -109,6 +110,8 @@ const initializeState = (): BlackjackState => {
     let deckId = localStorage.getItem('deckId')
     deckId = deckId === 'undefined' ? '' : deckId
     const bestStreak = localStorage.getItem('bestStreak')
+    const dontShowOnStartup = localStorage.getItem('dontShowOnStartup')
+    const isTutorialVisible = dontShowOnStartup === 'true' ? false : true
     return {
         deckId: deckId ?? '',
         players: {
@@ -138,7 +141,8 @@ const initializeState = (): BlackjackState => {
         banner: {
             isVisible: false,
             text: ''
-        }
+        },
+        isTutorialVisible: isTutorialVisible
     };
 };
 
@@ -194,6 +198,9 @@ export const blackjackSlice = createSlice({
         },
         setIsDeckShuffling: (state, action: PayloadAction<boolean>) => {
             state.isDeckShuffling = action.payload
+        },
+        setIsTutorialVisible: (state, action: PayloadAction<boolean>) => {
+            state.isTutorialVisible = action.payload
         },
         setBanner: (state, action: PayloadAction<BannerType>) => {
             const { isVisible, text } = action.payload
@@ -252,7 +259,7 @@ export const blackjackSlice = createSlice({
     }
 })
 
-export const { setDeckId, setGameState, setPile, setCurrentStreak, setBestStreak, setBanner, initializeGame, addToGameLogs, setDrawLoading, setMusic, setLastEventSfx } = blackjackSlice.actions
+export const { setDeckId, setGameState, setPile, setCurrentStreak, setIsTutorialVisible, setBestStreak, setBanner, initializeGame, addToGameLogs, setDrawLoading, setMusic, setLastEventSfx } = blackjackSlice.actions
 
 // Other code such as selectors can use the imported `RootState` type
 // export const selectCount = (state: RootState) => state.counter.value

@@ -17,6 +17,7 @@ import GameManager from '../components/Managers/GameManager'
 
 import Nav from '../components/Nav'
 import Banner from '../components/Banner'
+import Help from '../components/Help'
 
 const api = new ApiHelper()
 
@@ -133,6 +134,7 @@ export default function Game() {
                     <SfxManager />
                     <GameManager handleDrawClick={handleDrawClick} />
                     <Banner></Banner>
+                    <Help></Help>
                 </div>
             </div>
         </>
