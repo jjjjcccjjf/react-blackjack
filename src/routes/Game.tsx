@@ -121,7 +121,7 @@ export default function Game() {
                         }
                         {
                             gameState === 'END_GAME' &&
-                            <Button>
+                            <Button disabled={true}>
                                 SHARE <FaPaperPlane />
                             </Button>
                         }
